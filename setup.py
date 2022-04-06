@@ -10,7 +10,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='dataLib',
+    name='data-lib',
     version='0.1',
     url='https://github.com/jgarciaf106/dataLib',
     license='',
@@ -19,7 +19,22 @@ setup(
     description='Analytics and Reporting',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=['dataLib'],
+    packages=['data-lib'],
     include_package_data=True,
-    install_requires=["numpy"]
+    install_requires=[
+        "setuptools>=62.0.0",
+        "pyodbc>=4.0.32",
+        "pandas>=1.4.2",
+        "numpy>=1.21.5",
+        "xlwings>=0.27.4",
+        "openpyxl>=3.0.9",
+        "matplotlib>=3.5.1",
+        "seaborn>=0.11.2",
+        "fiscalyear>=0.4.0",
+        "pymongo>=4.0.2",
+        "sqlalchemy>=1.4.34",
+        "python-pptx>=0.6.21",
+        "pytest>=7.1.1",
+        "black>=22.3.0"
+    ]
 )
