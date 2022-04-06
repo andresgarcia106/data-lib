@@ -10,7 +10,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='data-lib',
+    name='ag-data-lib',
     version='0.1',
     url='https://github.com/jgarciaf106/dataLib',
     license='',
@@ -19,7 +19,7 @@ setup(
     description='Analytics and Reporting',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=['data-lib'],
+    packages=['data_lib'],
     include_package_data=True,
     install_requires=[
         "setuptools>=62.0.0",
