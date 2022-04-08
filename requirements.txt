@@ -12,3 +12,4 @@ sqlalchemy>=1.4.34
 python-pptx>=0.6.21
 pytest>=7.1.1
 black>=22.3.0
+pyxlsb>=1.0.9

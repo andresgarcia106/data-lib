@@ -1,7 +1,6 @@
 import os
 from pptx import Presentation
 
-
 # delete existing file
 def file_cleaner(file_name):
     """
