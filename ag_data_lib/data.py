@@ -24,24 +24,35 @@ class DB:
         if self._cfg["type"] == "postgres":
             return create_engine(
                 self._cfg["connstring"].format(
-                    self._cfg["user"], self._cfg["password"], self._cfg["server"], self._cfg["database"]
+                    self._cfg["user"],
+                    self._cfg["password"],
+                    self._cfg["server"],
+                    self._cfg["database"],
                 )
             )
         elif self._cfg["type"] == "mssql":
             return create_engine(
-                self._cfg["connstring"].format(self._cfg["server"], self._cfg["database"])
+                self._cfg["connstring"].format(
+                    self._cfg["server"], self._cfg["database"]
+                )
             )
 
         elif self._cfg["type"] == "oracle":
             return create_engine(
                 self._cfg["connstring"].format(
-                    self._cfg["user"], self._cfg["password"], self._cfg["server"], self._cfg["database"]
+                    self._cfg["user"],
+                    self._cfg["password"],
+                    self._cfg["server"],
+                    self._cfg["database"],
                 )
             )
         elif self._cfg["type"] == "mysql":
             return create_engine(
                 self._cfg["connstring"].format(
-                    self._cfg["user"], self._cfg["password"], self._cfg["server"], self._cfg["database"]
+                    self._cfg["user"],
+                    self._cfg["password"],
+                    self._cfg["server"],
+                    self._cfg["database"],
                 )
             )
 
@@ -76,20 +87,20 @@ class Data:
         """
 
         if not set_custom_path:
-            self._input_path = self._cfg.path["input"]
-            self._load_path = self._cfg.path["load"]
-            self._output_path = self._cfg.path["output"]
-            self._query_path = self._cfg.path["queries"]
-            self._pass_path = self._cfg.path["tracker"]
+            paths = create_path()
+            self._input_path = paths[0]
+            self._output_path = paths[1]
+            self._query_path = paths[2]
+            self._pass_path = paths[3]
         else:
-            if path_type == "output":
+            if path_type == "output_data":
                 self._output_path = custom_path
-            elif path_type == "load":
-                self._load_path = custom_path
-            elif path_type == "query":
+            elif path_type == "query_files":
                 self._query_path = custom_path
-            elif path_type == "input":
+            elif path_type == "input_data":
                 self._input_path = custom_path
+            elif path_type == "pass_tracker":
+                self._pass_path = custom_path
 
     def _set_fiscal_year(self, f_year=None, s_month=11, s_day=1, s_year="previous"):
         """
@@ -116,49 +127,38 @@ class Data:
             fy.FiscalQuarter.current().prev_fiscal_quarter
         ).split(" ")[1]
 
-    def external_query(self, query_name, db_engine):
+    def run_sql_query(self, query, db_engine):
         """
-        :param query_name: The name of the query you want to run
+        :param query_name: The name of the query file you want to run
         :return: A dataframe
         """
 
-        query_path = self._query_path + "{0}.sql".format(query_name)
-        with open(query_path) as get:
-            query = get.read()
-        return pd.read_sql_query(query, db_engine)
-
-    def internal_query(self, query_name, db_engine):
-        """
-        :param query_name: The name of the query to run
-        :return: A dataframe
-        """
-
-        return pd.read_sql_query(query_name, db_engine)
-
-    def execute_query(self, query_name, db_engine):
-        """
-        Execute a query using the engine
-
-        :param query_name: The name of the query to execute
-        """
-        with db_engine as connection:
-            connection.execute(query_name)
-
-    def file_query(self, file_name, engine_reader=None, read_sheet=0):
-        """
-        :param file_name: The name of the file to be read
-        :param engine_reader: The engine to use for reading the Excel file
-        :param read_sheet: The sheet number to read, defaults to 0 (optional)
-        :return: A dataframe
-        """
-
-        file = self._input_path + file_name
-        if engine_reader is None:
-            return pd.read_excel(file, sheet_name=read_sheet, index_col=0)
+        if os.path.exists(self._query_path + f"{query}.sql"):
+            query = open(self._query_path + f"{query}.sql").read()
+            return pd.read_sql_query(query, db_engine)
         else:
-            return pd.read_excel(
-                file, sheet_name=read_sheet, index_col=0, engine=engine_reader
-            )
+            return pd.read_sql_query(query, db_engine)
+
+    def execute_sql_query(self, query, db_engine):
+        """
+        Execute a query file or inline query using the engine
+
+        :param query: The name or file name of the sql script to execute
+        """
+        db_engine.execute(query) if os.path.exists(
+            self._query_path + f"{query}.sql"
+        ) else db_engine.execute(query)
+
+    def read_file(reader, file_path,  **kwargs):
+        """
+        It takes a function as an argument and returns the result of calling that function on the file
+        path
+        
+        :param reader: a function that takes a file path and returns a pandas dataframe
+        :param file_path: The path to the file to read
+        :return: the reader function.
+        """
+        return reader(file_path, **kwargs)
 
     def _password_tracker(self, request_date, output_file_name, password):
         """
@@ -206,7 +206,7 @@ class Data:
 
         pass
 
-    def _draft_email(self, recipient, file_name, password, folder_search):
+    def _draft_report_to_email(self, recipient, file_name, password, folder_search):
         """
         :param recipient: The email address of the recipient
         :param file_name: The name of the file that will be attached to the email
@@ -216,14 +216,16 @@ class Data:
         :return: None
         """
 
-        outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
+        OUTLOOK = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")        
+        CURRENT_USER = OUTLOOK.CurrentUser.AddressEntry.GetExchangeUser().PrimarySmtpAddress
+        
         if folder_search is not None:
-            inbox = outlook.GetDefaultFolder(6).Folders.Item(
+            inbox = OUTLOOK.GetDefaultFolder(6).Folders.Item(
                 folder_search
             )  # inbox in sub-folders
         else:
-            inbox = outlook.GetDefaultFolder(6)  # inbox emails
-
+            inbox = OUTLOOK.GetDefaultFolder(6)  # inbox emails
+        
         # instantiate outlook to send email
         const = win32com.client.constants
         ol_mail_item = 0x0
@@ -239,7 +241,7 @@ class Data:
                 item.AddressEntry.GetExchangeUser().PrimarySmtpAddress
                 for item in message.Recipients
                 if item.AddressEntry.GetExchangeUser().PrimarySmtpAddress
-                != "andres.garcia.fernandez@hp.com"
+                != CURRENT_USER
             ]
         )
 
@@ -319,7 +321,7 @@ class Data:
         file_password = None
 
         # remove existing files before save
-        ut.file_cleaner("{0}{1}.xlsx".format(self._output_path, file_name))
+        file_cleaner("{0}{1}.xlsx".format(self._output_path, file_name))
 
         # workbook / sheet variables
         app = xw.App(visible=False)
@@ -327,24 +329,24 @@ class Data:
         ws = wb.sheets[0]
 
         # excel data header formatting
-        ws.range("A1").options(pd.DataFrame, index=False).value = ut.number_to_string(
+        ws.range("A1").options(pd.DataFrame, index=False).value = number_to_string(
             data, "ID"
         )
         header_format = ws.range("A1").expand("right")
-        header_format.color = self._cfg.file_format["header_bg_color"]
-        header_format.api.Font.Name = self._cfg.file_format["font_name"]
-        header_format.api.Font.Color = self._cfg.file_format["header_font_color"]
+        header_format.color = self._cfg["header_bg_color"]
+        header_format.api.Font.Name = self._cfg["font_name"]
+        header_format.api.Font.Color = self._cfg["header_font_color"]
         header_format.api.Font.Bold = True
-        header_format.api.Font.Size = self._cfg.file_format["header_font_size"]
+        header_format.api.Font.Size = self._cfg["header_font_size"]
 
         # excel data content formatting
         data_format = ws.range("A2").current_region
-        data_format.api.Font.Name = self._cfg.file_format["font_name"]
-        data_format.api.Font.Size = self._cfg.file_format["content_font_size"]
+        data_format.api.Font.Name = self._cfg["font_name"]
+        data_format.api.Font.Size = self._cfg["content_font_size"]
 
         # save password protect file if needed
         if protect_file:
-            file_password = "HPI" + str(self._today.strftime("%I%M%S"))
+            file_password = password_generator(self._cfg["report_key"])
             wb.api.SaveAs(self._output_path + file_name, Password=file_password)
 
         else:

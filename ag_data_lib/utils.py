@@ -1,4 +1,5 @@
 import os
+import datetime as dt
 from pptx import Presentation
 
 # delete existing file
@@ -14,6 +15,26 @@ def file_cleaner(file_name):
 
     if os.path.exists(file_name):
         os.remove(file_name)
+
+
+# create default folders
+def create_path():
+    """
+    It creates a list of paths to be created, then it creates them
+    :return: A list of paths to the directories created.
+    """
+    paths = ["input_data", "output_data", "query_files", "pass_traker"]
+
+    root = os.getcwd()
+
+    try:
+        output_path = [
+            root + "\\" + path for path in paths if os.mkdir(root + "\\" + path) is None
+        ]
+    except FileExistsError:
+        raise
+
+    return output_path
 
 
 # trims whitespaces
@@ -57,6 +78,9 @@ def number_to_string(df, column_name):
         return df
     else:
         return df
+    
+def password_generator(co_key):
+    return co_key + str(dt.datetime.today().strftime("%I%M%S"))
 
 
 def ppt_identifier(input_file, slide_number):

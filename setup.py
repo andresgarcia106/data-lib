@@ -11,7 +11,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='ag-data-lib',
-    version='0.2',
+    version='0.3',
     url='https://github.com/jgarciaf106/dataLib',
     license='',
     author='Andres Garcia',
@@ -19,7 +19,7 @@ setup(
     description='Analytics and Reporting',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=['data_lib'],
+    packages=['ag_data_lib'],
     include_package_data=True,
     install_requires=[
         "setuptools>=62.0.0",
@@ -35,6 +35,8 @@ setup(
         "sqlalchemy>=1.4.34",
         "python-pptx>=0.6.21",
         "pytest>=7.1.1",
-        "black>=22.3.0"
+        "black>=22.3.0",
+        "plotly>=5.7.0"
+        "cufflinks>=0.17.3"
     ]
 )
