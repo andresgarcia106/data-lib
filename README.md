@@ -38,7 +38,7 @@ You can use more than one db configuration.
 How to use this lib:
 
 ```Python
-from data_lib import DB, Data
+from ag_data_lib import DB, Data
 
 # Instantiate a DB object
 db = DB(configs)
