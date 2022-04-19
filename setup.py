@@ -11,7 +11,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='ag-data-lib',
-    version='0.1.2',
+    version='0.1.3',
     url='https://github.com/jgarciaf106/dataLib',
     license='',
     author='Andres Garcia',
@@ -37,7 +37,6 @@ setup(
         "python-pptx>=0.6.21",
         "pytest>=7.1.1",
         "black>=22.3.0",
-        "plotly>=1.7.6",
-        "cufflinks>=0.17.3"
+        "plotly>=1.7.6"
     ]
 )
