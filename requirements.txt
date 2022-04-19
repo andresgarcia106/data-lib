@@ -13,5 +13,5 @@ python-pptx>=0.6.21
 pytest>=7.1.1
 black>=22.3.0
 pyxlsb>=1.0.9
-plotly>=5.7.0
-cufflinks>=0.17.3
+plotly>=1.7.6
+pyinstaller>=5.0

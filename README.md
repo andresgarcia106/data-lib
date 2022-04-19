@@ -68,3 +68,11 @@ or
 from config import config_one, config_two etc...
 
 ```
+
+# Create a Jupyter Notebook to Work on
+
+Run the following command on your terminal:
+```cmd
+python -s Scripts/generate_nb.py
+
+```

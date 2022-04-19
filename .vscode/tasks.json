@@ -6,7 +6,10 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "rm -r build ag_data_lib.egg-info dist && python setup.py sdist bdist_wheel && twine check dist/*"
+            "command": "rm -r build ag_data_lib.egg-info dist && python setup.py sdist bdist_wheel && twine check dist/*",
+			"presentation": {
+				"close": true
+			}
         }
     ]
 }
