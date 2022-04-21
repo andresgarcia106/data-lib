@@ -75,8 +75,8 @@ This template includes some basic settings to start working with the library
 
 Run the following command on your terminal:
 ```cmd
-python -s Scripts/new_notebook.py # to create a notebook with a generic name.
+python -m new_notebook # to create a notebook with a generic name.
 or
-python -s Scripts/new_notebook.py -n my_notebook_name # to create a notebook with a custom name
+python -m new_notebook -n my_notebook_name # to create a notebook with a custom name
 
 ```

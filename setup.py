@@ -11,7 +11,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='ag-data-lib',
-    version='0.1.6',
+    version='0.1.8',
     url='https://github.com/jgarciaf106/dataLib',
     license='',
     author='Andres Garcia',
@@ -20,8 +20,12 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=['ag_data_lib'],
-    include_package_data=True, 
-    scripts=['scripts/new_notebook.py'],
+    include_package_data=True,
+    entry_points={
+        "console_scripts": [
+            "ag-nb=ag_data_lib.scripts.new_notebook:main",
+        ],
+    },
     install_requires=[
         "setuptools>=62.0.0",
         "pyodbc>=4.0.32",

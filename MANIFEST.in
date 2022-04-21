@@ -1,1 +1,2 @@
-include ag_data_lib\notebook_template\nb_template.ipynb
+include ag_data_lib\notebook_template\notebook_template.ipynb
+include ag_data_lib\scripts\new_notebook.py
