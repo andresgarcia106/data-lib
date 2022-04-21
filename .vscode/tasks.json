@@ -6,7 +6,15 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "rm -r build ag_data_lib.egg-info dist && python setup.py sdist bdist_wheel && twine check dist/*",
+            "command": "clear && rm -r build ag_data_lib.egg-info dist && python setup.py sdist bdist_wheel && twine check dist/* && mkdir ./dist/release && cp dist/*.tar.gz dist/release/ag-data-lib.tar.gz",
+			"presentation": {
+				"close": true
+			}
+        },
+        {
+            "label": "install",
+            "type": "shell",
+            "command": "clear && py -m pip install https://github.com/jgarciaf106/dataLib/releases/download/pypackage/dataLib-0.1.5.tar.gz",
 			"presentation": {
 				"close": true
 			}
