@@ -1,12 +1,12 @@
-# Data Lib
+# AG Data Lib
 A small library for gathering data and creating reports.
 
 ### Installation
 ```
-pip install ag-data-lib
+pip install https://github.com/jgarciaf106/dataLib/releases/latest/download/ag-data-lib.tar.gz
 ```
 
-### Get started
+### Getting started
 Create a config.py file, where you place your settings database config and data reporting configs, e.g:
 
 ```Python 
@@ -69,10 +69,14 @@ from config import config_one, config_two etc...
 
 ```
 
-# Create a Jupyter Notebook to Work on
+# Create a Jupyter Notebook
+
+This template includes some basic settings to start working with the library
 
 Run the following command on your terminal:
 ```cmd
-python -s Scripts/generate_nb.py
+python -s Scripts/new_notebook.py # to create a notebook with a generic name.
+or
+python -s Scripts/new_notebook.py -n my_notebook_name # to create a notebook with a custom name
 
 ```
