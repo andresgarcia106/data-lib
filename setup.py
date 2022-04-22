@@ -41,6 +41,7 @@ setup(
         "python-pptx>=0.6.21",
         "pytest>=7.1.1",
         "black>=22.3.0",
-        "plotly>=1.7.6"
+        "plotly>=1.7.6",
+        "nbconvert>=6.5.0"
     ]
 )

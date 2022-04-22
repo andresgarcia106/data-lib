@@ -1,6 +1,7 @@
 import os
 import datetime as dt
 from pptx import Presentation
+from IPython.core.magic import (register_line_magic, register_cell_magic,register_line_cell_magic)
 
 # delete existing file
 def file_cleaner(file_name):
@@ -103,7 +104,34 @@ def ppt_identifier(input_file, slide_number):
             % (shape.shape_id, shape.name, shape.shape_type)
         )
 
+@register_line_magic
+def notebook_to_html(line):
+    filename = "ag_04_anitaB_top_companies_2021.ipynb"
+    cmd = f'!jupyter nbconvert --to html --no-input {filename}'
+    get_ipython().run_cell(cmd)
 
+
+
+def create_folder_tree(root_folder, sub_dir_folder, folder_list, path):
+    
+    # Create directory
+    try:
+        # Create target Directory
+        os.mkdir(path + root_folder)
+        os.mkdir(path + root_folder + '/' + sub_dir_folder)
+        print(f"Directory {root_folder} and {sub_dir_folder} created") 
+    except FileExistsError:
+        os.mkdir(path + root_folder + '/' + sub_dir_folder)
+        print("Directory " , root_folder ,  " already exists")        
+    
+    for folder in folder_list:
+        try:
+            # Create target Directory
+            os.mkdir(path + root_folder + '/' + sub_dir_folder + '/' + folder)
+            print(f"Directory {folder} created") 
+        except FileExistsError:
+            print("Directory " , folder ,  " already exists")
+    
 def ppt_analyzer(input_path, output_path):
     """
     Review a PowerPoint presentation to indicate each of ppt elements

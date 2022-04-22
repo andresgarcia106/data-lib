@@ -14,3 +14,5 @@ pytest>=7.1.1
 black>=22.3.0
 pyxlsb>=1.0.9
 plotly>=1.7.6
+nbconvert>=6.5.0
+xhtml2pdf>=0.2.7

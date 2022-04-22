@@ -80,3 +80,10 @@ or
 python -m new_notebook -n my_notebook_name # to create a notebook with a custom name
 
 ```
+
+# Magic commands
+
+Run the following command on your notebook cell:
+```Ipython
+%notebook_to_html # to convert the notebook to html.
+```
