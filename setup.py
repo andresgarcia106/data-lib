@@ -11,7 +11,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='ag-data-lib',
-    version='0.1.9',
+    version='0.2.0-beta',
     url='https://github.com/jgarciaf106/dataLib',
     license='',
     author='Andres Garcia',

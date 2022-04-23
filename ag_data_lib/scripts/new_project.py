@@ -64,10 +64,10 @@ def generate_cfg(path):
     cwd = os.getcwd() + "\\"
     root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     config_template = glob.glob(
-        root_path + "/**/config_template.py", recursive=True
+        root_path + "/**/config_template.cfg", recursive=True
     )[0]
 
-    shutil.copy2(config_template, cwd + f"{path}/config.py")
+    shutil.copy2(config_template, cwd + f"{path}/config.cfg")
     
 def generate_nb(path):
     """
