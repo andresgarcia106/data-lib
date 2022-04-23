@@ -1,7 +1,10 @@
 import os
 import datetime as dt
 from pptx import Presentation
-from IPython.core.magic import (register_line_magic, register_cell_magic,register_line_cell_magic)
+from traitlets.config import Config
+import nbformat as nbf
+from nbconvert.exporters import HTMLExporter
+from nbconvert.preprocessors import TagRemovePreprocessor
 
 # delete existing file
 def file_cleaner(file_name):
@@ -79,9 +82,49 @@ def number_to_string(df, column_name):
         return df
     else:
         return df
-    
+
+
 def password_generator(co_key):
+    """
+    It takes a string as an argument and returns a string that is the concatenation of the argument and
+    the current time
+    
+    :param co_key: This is the company key that is used to identify the company
+    :return: the concatenation of the co_key and the current time.
+    """
     return co_key + str(dt.datetime.today().strftime("%I%M%S"))
+
+
+def notebook_to_html(notebook_path, html_path):
+    """
+    It takes a Jupyter notebook and converts it to an HTML file
+    
+    :param notebook_path: The path to the notebook you want to convert
+    :param html_path: The path to the output HTML file
+    """
+    # Setup config
+    cfg = Config()
+
+    cfg.TemplateExporter.exclude_input = True
+    cfg.TemplateExporter.exclude_input_prompt = True
+    cfg.TagRemovePreprocessor.enabled = True
+
+    # Configure and run out exporter
+    cfg.HTMLExporter.preprocessors = ["nbconvert.preprocessors.TagRemovePreprocessor"]
+
+    exporter = HTMLExporter(config=cfg)
+    exporter.register_preprocessor(TagRemovePreprocessor(config=cfg), True)
+
+    # Configure and run our exporter - returns a tuple - first element with html,
+    # second with notebook metadata
+    try:
+        output = HTMLExporter(config=cfg).from_filename(notebook_path)
+        html_output_name = notebook_path.rsplit('.', 1)[0] + '.html'
+        # Write to output html file
+        with open(html_path + f"/{html_output_name}", "w", encoding="utf8") as f:
+            f.write(output[0])
+    except FileNotFoundError:
+        print("Notebook not found. Review the Notebook path.")
 
 
 def ppt_identifier(input_file, slide_number):
@@ -104,34 +147,28 @@ def ppt_identifier(input_file, slide_number):
             % (shape.shape_id, shape.name, shape.shape_type)
         )
 
-@register_line_magic
-def notebook_to_html(line):
-    filename = "ag_04_anitaB_top_companies_2021.ipynb"
-    cmd = f'!jupyter nbconvert --to html --no-input {filename}'
-    get_ipython().run_cell(cmd)
-
-
 
 def create_folder_tree(root_folder, sub_dir_folder, folder_list, path):
-    
+
     # Create directory
     try:
         # Create target Directory
         os.mkdir(path + root_folder)
-        os.mkdir(path + root_folder + '/' + sub_dir_folder)
-        print(f"Directory {root_folder} and {sub_dir_folder} created") 
+        os.mkdir(path + root_folder + "/" + sub_dir_folder)
+        print(f"Directory {root_folder} and {sub_dir_folder} created")
     except FileExistsError:
-        os.mkdir(path + root_folder + '/' + sub_dir_folder)
-        print("Directory " , root_folder ,  " already exists")        
-    
+        os.mkdir(path + root_folder + "/" + sub_dir_folder)
+        print("Directory ", root_folder, " already exists")
+
     for folder in folder_list:
         try:
             # Create target Directory
-            os.mkdir(path + root_folder + '/' + sub_dir_folder + '/' + folder)
-            print(f"Directory {folder} created") 
+            os.mkdir(path + root_folder + "/" + sub_dir_folder + "/" + folder)
+            print(f"Directory {folder} created")
         except FileExistsError:
-            print("Directory " , folder ,  " already exists")
-    
+            print("Directory ", folder, " already exists")
+
+
 def ppt_analyzer(input_path, output_path):
     """
     Review a PowerPoint presentation to indicate each of ppt elements

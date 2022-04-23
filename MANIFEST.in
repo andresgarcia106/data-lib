@@ -1,2 +1,5 @@
-include ag_data_lib\notebook_template\notebook_template.ipynb
+include ag_data_lib\templates\notebook_template.ipynb
+include ag_data_lib\templates\config_template.cfg
 include ag_data_lib\scripts\new_notebook.py
+include ag_data_lib\scripts\new_config.py
+include ag_data_lib\scripts\new_project.py

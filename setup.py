@@ -11,7 +11,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='ag-data-lib',
-    version='0.1.8',
+    version='0.1.9',
     url='https://github.com/jgarciaf106/dataLib',
     license='',
     author='Andres Garcia',
@@ -24,6 +24,8 @@ setup(
     entry_points={
         "console_scripts": [
             "ag-nb=ag_data_lib.scripts.new_notebook:main",
+            "ag-cfg=ag_data_lib.scripts.new_config:main",
+            "ag-prj=ag_data_lib.scripts.new_project:main",
         ],
     },
     install_requires=[

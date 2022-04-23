@@ -6,7 +6,7 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "clear && rm -r build ag_data_lib.egg-info dist && python setup.py sdist bdist_wheel && twine check dist/* && mkdir ./dist/release && cp dist/*.tar.gz dist/release/ag-data-lib.tar.gz",
+            "command": "clear && rm -r -f build ag_data_lib.egg-info dist && python setup.py sdist bdist_wheel && twine check dist/* && mkdir ./dist/release && cp dist/*.tar.gz dist/release/ag-data-lib.tar.gz",
 			"presentation": {
 				"close": true
 			}

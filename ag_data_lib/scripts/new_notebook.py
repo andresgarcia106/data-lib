@@ -44,7 +44,7 @@ def main():
 
     if get_args(sys.argv) != "":
         notebook_new_name = get_args(sys.argv)
-        shutil.copy2(notebook_template, cwd + notebook_new_name + ".ipynb")
+        shutil.copy2(notebook_template, cwd + f"{notebook_new_name}.ipynb")
     else:
         shutil.copy2(notebook_template, cwd)
 

@@ -34,6 +34,11 @@ data_config = {
 
 You can use more than one db configuration.
 
+Run the following command on your terminal:
+```cmd
+ag-cfg # to create a config file with the default settings.
+
+```
 
 How to use this lib:
 
@@ -69,21 +74,28 @@ from config import config_one, config_two etc...
 
 ```
 
+# Create a Project folder
+
+This template includes some basic settings to start working with the library
+
+Run the following command on your terminal:
+```cmd
+ag-prj # to create a project folder with a generic name.
+or
+ag-prj -n my_project_name # to create a project with a custom name
+```
+
 # Create a Jupyter Notebook
 
 This template includes some basic settings to start working with the library
 
 Run the following command on your terminal:
 ```cmd
-python -m new_notebook # to create a notebook with a generic name.
+ag-nb # to create a notebook with a generic name.
 or
-python -m new_notebook -n my_notebook_name # to create a notebook with a custom name
+ag-nb -n my_notebook_name # to create a notebook with a custom name
 
 ```
 
-# Magic commands
 
-Run the following command on your notebook cell:
-```Ipython
-%notebook_to_html # to convert the notebook to html.
-```
+
