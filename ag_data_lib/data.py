@@ -78,7 +78,13 @@ class Data:
         self._fiscal_quarter = None
         self._set_fiscal_year()
 
-    def set_path(self, set_cfg_paths=True, set_custom_path=False,  path_type=None, custom_path=None):
+    def set_path(
+        self,
+        set_cfg_paths=True,
+        set_custom_path=False,
+        path_type=None,
+        custom_path=None,
+    ):
         """
         :param set_custom_path: If you want to set a custom path, set this to True, defaults to False
         (optional)
@@ -99,16 +105,13 @@ class Data:
                 elif path_type == "input_data":
                     self._input_path = custom_path
                 elif path_type == "pass_tracker":
-                    self._pass_path = custom_path          
+                    self._pass_path = custom_path
             else:
                 paths = create_path()
                 self._input_path = paths[0]
                 self._output_path = paths[1]
                 self._query_path = paths[2]
                 self._pass_path = paths[3]
-
-        
-                
 
     def _set_fiscal_year(self, f_year=None, s_month=11, s_day=1, s_year="previous"):
         """
@@ -157,16 +160,21 @@ class Data:
             self._query_path + f"{query}.sql"
         ) else db_engine.execute(query)
 
-    def read_file(reader, file_path,  **kwargs):
+    def read_file(self, reader, file_path, **kwargs):
         """
         It takes a function as an argument and returns the result of calling that function on the file
         path
-        
+
         :param reader: a function that takes a file path and returns a pandas dataframe
         :param file_path: The path to the file to read
         :return: the reader function.
         """
-        return reader(file_path, **kwargs)
+        df = (
+            reader(self._input_path + file_path, **kwargs)
+            if os.path.exists(self._input_path + file_path)
+            else reader(file_path, **kwargs)
+        )
+        return df
 
     def _password_tracker(self, request_date, output_file_name, password):
         """
@@ -176,7 +184,7 @@ class Data:
         """
 
         file_name = "password_tracker.json"
-        list_obj = []
+        json_obj = []
 
         if os.path.isfile(self._pass_path + file_name) is False:
             with open(self._pass_path + file_name, "w"):
@@ -185,9 +193,9 @@ class Data:
         # Read JSON file
         if os.stat(self._pass_path + file_name).st_size != 0:
             with open(self._pass_path + file_name) as get_content:
-                list_obj = json.load(get_content)
+                json_obj = json.load(get_content)
 
-        list_obj.append(
+        json_obj.append(
             {
                 "Request Date": str(request_date),
                 "File Name": output_file_name,
@@ -197,7 +205,7 @@ class Data:
         )
 
         with open(self._pass_path + file_name, "w") as json_file:
-            json.dump(list_obj, json_file, indent=4, separators=(",", ": "))
+            json.dump(json_obj, json_file, indent=4, separators=(",", ": "))
 
     def _password_share(self, password, email_subject):
         """
@@ -224,16 +232,18 @@ class Data:
         :return: None
         """
 
-        OUTLOOK = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")        
-        CURRENT_USER = OUTLOOK.CurrentUser.AddressEntry.GetExchangeUser().PrimarySmtpAddress
-        
+        OUTLOOK = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
+        CURRENT_USER = (
+            OUTLOOK.CurrentUser.AddressEntry.GetExchangeUser().PrimarySmtpAddress
+        )
+
         if folder_search is not None:
             inbox = OUTLOOK.GetDefaultFolder(6).Folders.Item(
                 folder_search
             )  # inbox in sub-folders
         else:
             inbox = OUTLOOK.GetDefaultFolder(6)  # inbox emails
-        
+
         # instantiate outlook to send email
         const = win32com.client.constants
         ol_mail_item = 0x0
