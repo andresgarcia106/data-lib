@@ -27,17 +27,16 @@ def create_path():
     It creates a list of paths to be created, then it creates them
     :return: A list of paths to the directories created.
     """
-    paths = ["input_data", "output_data", "query_files", "pass_traker"]
-
-    root = os.getcwd()
-
-    try:
-        output_path = [
-            root + "\\" + path for path in paths if os.mkdir(root + "\\" + path) is None
-        ]
-    except FileExistsError:
-        raise
-
+    output_path = []
+    root = os.path.dirname(os.getcwd())
+    target_dir = "02_data"
+    paths = ["01_input_files", "02_output_files", "03_query_files", "04_password_files"]
+    
+    for path in paths:
+        if not os.path.isdir(root + f"\\{target_dir}\\{path}"):   
+            os.mkdir(root + f"\\{target_dir}\\{path}")         
+            output_path.append(root + f"\\{target_dir}\\{path}")
+            
     return output_path
 
 

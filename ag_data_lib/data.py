@@ -78,29 +78,37 @@ class Data:
         self._fiscal_quarter = None
         self._set_fiscal_year()
 
-    def set_path(self, set_custom_path=False, path_type=None, custom_path=None):
+    def set_path(self, set_cfg_paths=True, set_custom_path=False,  path_type=None, custom_path=None):
         """
         :param set_custom_path: If you want to set a custom path, set this to True, defaults to False
         (optional)
         :param path_type: The type of path you want to set
         :param custom_path: the path to the folder where the files are located
         """
-
-        if not set_custom_path:
-            paths = create_path()
-            self._input_path = paths[0]
-            self._output_path = paths[1]
-            self._query_path = paths[2]
-            self._pass_path = paths[3]
+        if set_cfg_paths:
+            self._input_path = self._cfg["input"]
+            self._output_path = self._cfg["output"]
+            self._query_path = self._cfg["queries"]
+            self._pass_path = self._cfg["tracker"]
         else:
-            if path_type == "output_data":
-                self._output_path = custom_path
-            elif path_type == "query_files":
-                self._query_path = custom_path
-            elif path_type == "input_data":
-                self._input_path = custom_path
-            elif path_type == "pass_tracker":
-                self._pass_path = custom_path
+            if set_custom_path:
+                if path_type == "output_data":
+                    self._output_path = custom_path
+                elif path_type == "query_files":
+                    self._query_path = custom_path
+                elif path_type == "input_data":
+                    self._input_path = custom_path
+                elif path_type == "pass_tracker":
+                    self._pass_path = custom_path          
+            else:
+                paths = create_path()
+                self._input_path = paths[0]
+                self._output_path = paths[1]
+                self._query_path = paths[2]
+                self._pass_path = paths[3]
+
+        
+                
 
     def _set_fiscal_year(self, f_year=None, s_month=11, s_day=1, s_year="previous"):
         """
@@ -134,8 +142,8 @@ class Data:
         """
 
         if os.path.exists(self._query_path + f"{query}.sql"):
-            query = open(self._query_path + f"{query}.sql").read()
-            return pd.read_sql_query(query, db_engine)
+            file_query = open(self._query_path + f"{query}.sql").read()
+            return pd.read_sql_query(file_query, db_engine)
         else:
             return pd.read_sql_query(query, db_engine)
 
