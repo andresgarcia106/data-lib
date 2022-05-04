@@ -6,6 +6,7 @@ import win32com.client
 import datetime as dt
 import pandas as pd
 import xlwings as xw
+from xlwings.utils import rgb_to_int
 import fiscalyear as fy
 from .utils import *
 from sqlalchemy import create_engine
@@ -63,13 +64,13 @@ class Data:
         The __init__ function is called when an instance of the class is created.
         :param config: The config object that was created in the previous step
         """
-        self._cfg = config
+        self._cfg = config        
+        self._root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir)) + "\\"
         self._output_path = None
-        self._load_path = None
         self._query_path = None
         self._input_path = None
         self._pass_path = None
-        self._today = dt.datetime.today() - pd.DateOffset(months=1)
+        self._today = dt.datetime.today()
         self._monthname_long = self._today.strftime("%B")
         self._monthname_short = self._today.strftime("%b")
         self._monthyear = self._today.strftime("%m%y")
@@ -92,10 +93,10 @@ class Data:
         :param custom_path: the path to the folder where the files are located
         """
         if set_cfg_paths:
-            self._input_path = self._cfg["input"]
-            self._output_path = self._cfg["output"]
-            self._query_path = self._cfg["queries"]
-            self._pass_path = self._cfg["tracker"]
+            self._input_path = self._root_path + self._cfg["input"]
+            self._output_path = self._root_path + self._cfg["output"]
+            self._query_path = self._root_path + self._cfg["queries"]
+            self._pass_path = self._root_path + self._cfg["tracker"]
         else:
             if set_custom_path:
                 if path_type == "output_data":
@@ -138,17 +139,30 @@ class Data:
             fy.FiscalQuarter.current().prev_fiscal_quarter
         ).split(" ")[1]
 
-    def run_sql_query(self, query, db_engine):
+    def run_sql_query(self, query, db_engine, **kwargs):
         """
-        :param query_name: The name of the query file you want to run
+        If the query is a file, then read the file and pass it to the database engine. If the query is a
+        string, then pass the string to the database engine
+        
+        :param query: The name of the query file to be run
+        :param db_engine: the database engine
         :return: A dataframe
         """
-
+        
         if os.path.exists(self._query_path + f"{query}.sql"):
-            file_query = open(self._query_path + f"{query}.sql").read()
-            return pd.read_sql_query(file_query, db_engine)
+            if kwargs == {}:
+                file_query = open(self._query_path + f"{query}.sql").read()
+                return pd.read_sql_query(file_query, db_engine)
+            else:
+                with open(self._query_path + f"{query}.sql") as get:
+                    file_query = get.read()
+                return pd.read_sql_query(file_query.format(**kwargs), db_engine)  
         else:
-            return pd.read_sql_query(query, db_engine)
+            if kwargs == {}:
+                return pd.read_sql_query(query, db_engine)
+            else:
+                return pd.read_sql_query(query.format(**kwargs), db_engine)
+            
 
     def execute_sql_query(self, query, db_engine):
         """
@@ -334,12 +348,15 @@ class Data:
         :param requester: The email address of the requester
         :param email_folder: The folder where the email will be saved
         """
-
-        # default password
-        file_password = None
-
+        
         # remove existing files before save
-        file_cleaner("{0}{1}.xlsx".format(self._output_path, file_name))
+        file_cleaner(f"{self._output_path}{file_name}")
+                
+        # default password
+        file_password = None        
+        file_format = file_format_constant(file_name)
+       
+        output_path = fr"{self._output_path}{file_name}"
 
         # workbook / sheet variables
         app = xw.App(visible=False)
@@ -348,29 +365,29 @@ class Data:
 
         # excel data header formatting
         ws.range("A1").options(pd.DataFrame, index=False).value = number_to_string(
-            data, "ID"
+            data, "Worker ID"
         )
         header_format = ws.range("A1").expand("right")
-        header_format.color = self._cfg["header_bg_color"]
+        header_format.color = rgb_to_int(eval(self._cfg["header_bg_color"]))
         header_format.api.Font.Name = self._cfg["font_name"]
-        header_format.api.Font.Color = self._cfg["header_font_color"]
+        header_format.font.color = rgb_to_int(eval(self._cfg["header_font_color"]))
         header_format.api.Font.Bold = True
         header_format.api.Font.Size = self._cfg["header_font_size"]
 
         # excel data content formatting
         data_format = ws.range("A2").current_region
         data_format.api.Font.Name = self._cfg["font_name"]
-        data_format.api.Font.Size = self._cfg["content_font_size"]
+        data_format.api.Font.Size = eval(self._cfg["content_font_size"])
 
         # save password protect file if needed
         if protect_file:
             file_password = password_generator(self._cfg["report_key"])
-            wb.api.SaveAs(self._output_path + file_name, Password=file_password)
+            wb.api.SaveAs(output_path, Password=file_password, FileFormat=file_format)
 
         else:
-            wb.api.SaveAs(self._output_path + file_name)
-
-        app.quit()
+            wb.api.SaveAs(output_path, FileFormat=file_format)
+        
+        app.kill()
 
         # update password tracker
         self._password_tracker(
@@ -382,7 +399,7 @@ class Data:
         # prompt
         if draft_email:
             self._draft_email(requester, file_name, file_password, email_folder)
-
+        
     def export_data(
         self,
         odf,
@@ -406,7 +423,7 @@ class Data:
 
         # assign file name
         if custom_filename is None:
-            file_name = "Output Report " + self._today.strftime("%Y-%m-%d")
+            file_name = "Output Report " + self._today.strftime("%Y-%m-%d") + ".xlsb"
         else:
             file_name = custom_filename
 

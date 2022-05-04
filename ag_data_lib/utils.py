@@ -59,6 +59,24 @@ def column_trim(df):
     trim_strings = lambda x: x.strip() if isinstance(x, str) else x
     return df.applymap(trim_strings)
 
+def file_format_constant(file_name):
+    """
+    Returns the file format constant
+    """
+    extension = file_name.split(".")[-1]
+    constant = 0
+    
+    if extension == "xlsb":
+        constant = 50    
+    elif extension == "xlsx":
+        constant =  51
+    elif extension == "xlsm":
+        constant = 52
+    elif extension == "csv":
+        constant =  62
+        
+    return constant 
+
 
 def number_to_string(df, column_name):
     """
