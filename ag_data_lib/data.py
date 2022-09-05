@@ -64,8 +64,8 @@ class Data:
         The __init__ function is called when an instance of the class is created.
         :param config: The config object that was created in the previous step
         """
-        self._cfg = config        
-        self._root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir)) + "\\"
+        self._cfg = config
+        self._root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir)) 
         self._output_path = None
         self._query_path = None
         self._input_path = None
@@ -143,12 +143,12 @@ class Data:
         """
         If the query is a file, then read the file and pass it to the database engine. If the query is a
         string, then pass the string to the database engine
-        
+
         :param query: The name of the query file to be run
         :param db_engine: the database engine
         :return: A dataframe
         """
-        
+
         if os.path.exists(self._query_path + f"{query}.sql"):
             if kwargs == {}:
                 file_query = open(self._query_path + f"{query}.sql").read()
@@ -156,13 +156,12 @@ class Data:
             else:
                 with open(self._query_path + f"{query}.sql") as get:
                     file_query = get.read()
-                return pd.read_sql_query(file_query.format(**kwargs), db_engine)  
+                return pd.read_sql_query(file_query.format(**kwargs), db_engine)
         else:
             if kwargs == {}:
                 return pd.read_sql_query(query, db_engine)
             else:
                 return pd.read_sql_query(query.format(**kwargs), db_engine)
-            
 
     def execute_sql_query(self, query, db_engine):
         """
@@ -348,25 +347,26 @@ class Data:
         :param requester: The email address of the requester
         :param email_folder: The folder where the email will be saved
         """
-        
+
+        # Before saving the file set DisplayAlerts to False to suppress the warning dialog:
+
         # remove existing files before save
         file_cleaner(f"{self._output_path}{file_name}")
-                
+
         # default password
-        file_password = None        
-        file_format = file_format_constant(file_name)
-       
-        output_path = fr"{self._output_path}{file_name}"
+        file_password = None
+        # file_format = file_format_constant(file_name)
+
+        output_path = f"{self._output_path}{file_name}"
 
         # workbook / sheet variables
         app = xw.App(visible=False)
         wb = xw.Book()
         ws = wb.sheets[0]
+        ws.name = "Data Export"
 
         # excel data header formatting
-        ws.range("A1").options(pd.DataFrame, index=False).value = number_to_string(
-            data, "Worker ID"
-        )
+        ws.range("A1").options(pd.DataFrame, index=False).value = number_to_string(data)
         header_format = ws.range("A1").expand("right")
         header_format.color = rgb_to_int(eval(self._cfg["header_bg_color"]))
         header_format.api.Font.Name = self._cfg["font_name"]
@@ -380,14 +380,28 @@ class Data:
         data_format.api.Font.Size = eval(self._cfg["content_font_size"])
 
         # save password protect file if needed
-        if protect_file:
-            file_password = password_generator(self._cfg["report_key"])
-            wb.api.SaveAs(output_path, Password=file_password, FileFormat=file_format)
+        try:
+            if protect_file:
+                file_password = password_generator(self._cfg["report_key"])
+                wb.save(output_path)
+                wb.close()
+                app.quit()
 
-        else:
-            wb.api.SaveAs(output_path, FileFormat=file_format)
-        
-        app.kill()
+                # password protect file
+                excel = win32com.client.gencache.EnsureDispatch("Excel.Application")
+                excel.DisplayAlerts = False
+                book = excel.Workbooks.Open(output_path)
+                book.SaveAs(output_path, 51, file_password)
+                book.Close()
+                excel.Application.Quit()
+
+            else:
+                wb.save(output_path)
+                wb.close()
+                app.quit()
+            
+        except Exception as e:
+            raise
 
         # update password tracker
         self._password_tracker(
@@ -399,7 +413,7 @@ class Data:
         # prompt
         if draft_email:
             self._draft_email(requester, file_name, file_password, email_folder)
-        
+
     def export_data(
         self,
         odf,

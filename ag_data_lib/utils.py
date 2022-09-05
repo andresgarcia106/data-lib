@@ -78,7 +78,7 @@ def file_format_constant(file_name):
     return constant 
 
 
-def number_to_string(df, column_name):
+def number_to_string(df):
     """
     Converts a column of numbers to strings
 
@@ -94,11 +94,12 @@ def number_to_string(df, column_name):
     pandas.DataFrame
         The converted dataframe
     """
-    if column_name in df.columns:
-        df[column_name] = "'" + df[column_name]
-        return df
-    else:
-        return df
+    for col in df.columns:
+        if "ID" in col:
+            df[col] = "'" + df[col]
+            return df
+        else:
+            return df
 
 
 def password_generator(co_key):

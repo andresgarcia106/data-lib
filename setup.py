@@ -11,7 +11,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='ag-data-lib',
-    version='0.2.2-beta',
+    version='0.3.0',
     url='https://github.com/jgarciaf106/dataLib',
     license='',
     author='Andres Garcia',
@@ -33,7 +33,7 @@ setup(
         "pyodbc>=4.0.32",
         "pandas>=1.4.2",
         "numpy>=1.21.5",
-        "xlwings>=0.27.4",
+        "xlwings>=0.27.14",
         "openpyxl>=3.0.9",
         "matplotlib>=3.5.1",
         "seaborn>=0.11.2",
@@ -43,6 +43,7 @@ setup(
         "python-pptx>=0.6.21",
         "pytest>=7.1.1",
         "black>=22.3.0",
+        "pyxlsb>=1.0.9",
         "plotly==5.7.0",
         "nbconvert>=6.5.0"
     ]

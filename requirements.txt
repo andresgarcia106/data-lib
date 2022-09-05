@@ -2,7 +2,7 @@ setuptools>=62.0.0
 pyodbc>=4.0.32
 pandas>=1.4.2
 numpy>=1.21.5
-xlwings>=0.27.4
+xlwings>=0.27.14
 openpyxl>=3.0.9
 matplotlib>=3.5.1
 seaborn>=0.11.2
@@ -15,4 +15,3 @@ black>=22.3.0
 pyxlsb>=1.0.9
 plotly==5.7.0
 nbconvert>=6.5.0
-xhtml2pdf>=0.2.7
