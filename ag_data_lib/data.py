@@ -56,6 +56,13 @@ class DB:
                     self._cfg["database"],
                 )
             )
+        elif self._cfg["type"] == "sqlite":
+            return create_engine(
+                self._cfg["connstring"].format(
+                    self._cfg["server"],
+                    self._cfg["database"],
+                )
+            )
 
 
 class Data:
@@ -65,7 +72,7 @@ class Data:
         :param config: The config object that was created in the previous step
         """
         self._cfg = config
-        self._root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir)) 
+        self._root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
         self._output_path = None
         self._query_path = None
         self._input_path = None
@@ -220,22 +227,25 @@ class Data:
         with open(self._pass_path + file_name, "w") as json_file:
             json.dump(json_obj, json_file, indent=4, separators=(",", ": "))
 
-    def _password_share(self, password, email_subject):
-        """
-        :param password: The password to be shared
-        :param email_subject: The subject of the email that will be sent to the user
-        """
+    # TODO: Add a function to send email with password after email with attachment is sent
+    # def _password_share(self, password, email_subject):
+    #     """
+    #     :param password: The password to be shared
+    #     :param email_subject: The subject of the email that will be sent to the user
+    #     """
 
-        outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
-        sent_items = outlook.GetDefaultFolder(5)
-        messages = sent_items.Items
-        message = messages.GetLast()
+    #     outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
+    #     sent_items = outlook.GetDefaultFolder(5)
+    #     messages = sent_items.Items
+    #     message = messages.GetLast()
 
-        print(password, email_subject, message)
+    #     print(password, email_subject, message)
 
-        pass
+    #     pass
 
-    def _draft_report_to_email(self, recipient, file_name, password, folder_search):
+    def _draft_report_to_email(
+        self, recipient, file_name, password=None, folder_search=None
+    ):
         """
         :param recipient: The email address of the recipient
         :param file_name: The name of the file that will be attached to the email
@@ -284,8 +294,6 @@ class Data:
         email_signature = html_file.read()
         html_file.close()
 
-        # html email body and subject
-
         # get original email subject
         email_subject = message.Subject
 
@@ -294,10 +302,11 @@ class Data:
         new_mail.Subject = email_subject
         new_mail.BodyFormat = 2
 
+        # html email body and subject
         if password is not None:
             email_body = """
                     <HTML>
-                        <BODY style="font-family:HP Simplified Light;font-size:14.5px;">
+                        <BODY style="font-family:Forma DJR Micro (Body);font-size:14.5px;">
                             <p>Hi {0},</p>
                             <p>Please find attached the report requested.</p>
                             <p>
@@ -314,7 +323,7 @@ class Data:
         else:
             email_body = """
                 <HTML>
-                    <BODY style="font-family:HP Simplified Light;font-size:14.5px;">
+                    <BODY style="font-family:Forma DJR Micro (Body);font-size:14.5px;">
                         <p>Hi {0},</p>
                         <p>Please find attached the report requested.</p>
                         <p>Kind Regards,</p> 
@@ -329,14 +338,22 @@ class Data:
             new_mail.HTMLBody = email_body + email_signature + reply_all.HTMLBody
             new_mail.To = sender_address
             new_mail.CC = sender_cc_address
-            attachment = self._output_path + file_name + ".xlsx"
+            attachment = self._output_path + file_name
             new_mail.Attachments.Add(Source=attachment)
             new_mail.save()
 
         return None
 
     def _file_saver(
-        self, data, file_name, protect_file, draft_email, requester, email_folder
+        self,
+        data,
+        file_name,
+        protect_file,
+        security_method,
+        auth_users,
+        draft_email,
+        requester,
+        email_folder,
     ):
         """
         :param data: The data to be written to the Excel file
@@ -382,33 +399,41 @@ class Data:
         # save password protect file if needed
         try:
             if protect_file:
-                file_password = password_generator(self._cfg["report_key"])
-                wb.save(output_path)
-                wb.close()
-                app.quit()
+                if security_method == "PWD":
+                    file_password = password_generator(self._cfg["report_key"])
+                    wb.save(output_path)
+                    wb.close()
+                    app.quit()
 
-                # password protect file
-                excel = win32com.client.gencache.EnsureDispatch("Excel.Application")
-                excel.DisplayAlerts = False
-                book = excel.Workbooks.Open(output_path)
-                book.SaveAs(output_path, 51, file_password)
-                book.Close()
-                excel.Application.Quit()
+                    # password protect file
+                    excel = win32com.client.gencache.EnsureDispatch("Excel.Application")
+                    excel.DisplayAlerts = False
+                    book = excel.Workbooks.Open(output_path)
+                    book.SaveAs(output_path, 51, file_password)
+                    book.Close()
+                    excel.Application.Quit()
+                    
+                    # update password tracker
+                    self._password_tracker(
+                        self._today,
+                        file_name,
+                        file_password,
+                    )
 
+                if security_method == "RMS":
+                    wb.save(output_path)
+                    active_book = xw.books.active
+                    for auth_user in auth_users:
+                        active_book.api.Permission.Add(auth_user, 15)
+                    wb.close()
+                    app.quit()
             else:
                 wb.save(output_path)
                 wb.close()
                 app.quit()
-            
+
         except Exception as e:
             raise
-
-        # update password tracker
-        self._password_tracker(
-            self._today,
-            file_name,
-            file_password,
-        )
 
         # prompt
         if draft_email:
@@ -419,6 +444,8 @@ class Data:
         odf,
         custom_filename=None,
         protect_file=False,
+        security_method=None,
+        auth_users=[],
         draft_email=False,
         requester=None,
         email_folder=None,
@@ -443,78 +470,91 @@ class Data:
 
         # save file
         self._file_saver(
-            odf, file_name, protect_file, draft_email, requester, email_folder
+            odf,
+            file_name,
+            protect_file,
+            security_method,
+            auth_users,
+            draft_email,
+            requester,
+            email_folder,
         )
 
-    def ppt_export(self, file_type, template_type, org=None):
-        """
-        :param file_type: "HPI" or "L1 ORG"
-        :param template_type: The template type is either "HPI" or "L1 ORG"
-        :param org: The name of the organization you want to export
-        """
+    # TODO: add a method to send the email to DEI, Planners and PLT Once quarterly report is ready.
+    def quarterly_email_sender(self, roster_df, file_name, email_round):
 
-        # determine output file HPI Total or L1 Org Dashboard
-        if file_type == "HPI":
-            output_file = "HPI DEI Dashboard {0} {1}".format(
-                self._current_quarter, self._fiscal_quarter
-            )
-        elif file_type == "L1 ORG":
-            output_file = "DEI {0} Dashboard {1}".format(org, self._monthyear)
+        pass
 
-        # set slides to be updated
-        prs = Presentation(
-            "../Templates/HP_Presentation_Template_" + template_type + ".pptx"
-        )
-        slide_1 = prs.slides[0]
-        slide_4 = prs.slides[3]
-        slide_6 = prs.slides[5]
-        slide_7 = prs.slides[6]
-        slide_8 = prs.slides[7]
-        slide_9 = prs.slides[8]
+    # TODO: Review need of function to create PPTX to avoid manual PPTX creation
+    # def ppt_export(self, file_type, template_type, org=None):
+    #     """
+    #     :param file_type: "HPI" or "L1 ORG"
+    #     :param template_type: The template type is either "HPI" or "L1 ORG"
+    #     :param org: The name of the organization you want to export
+    #     """
 
-        # set placeholders to be updated
-        prs_sub_1 = slide_1.placeholders[1]
-        prs_sub_4 = slide_4.placeholders[0]
-        prs_sub_6 = slide_6.placeholders[0]
-        prs_sub_7 = slide_7.placeholders[0]
-        prs_sub_8 = slide_8.placeholders[0]
-        prs_sub_9 = slide_9.placeholders[0]
+    #     # determine output file HPI Total or L1 Org Dashboard
+    #     if file_type == "HPI":
+    #         output_file = "HPI DEI Dashboard {0} {1}".format(
+    #             self._current_quarter, self._fiscal_quarter
+    #         )
+    #     elif file_type == "L1 ORG":
+    #         output_file = "DEI {0} Dashboard {1}".format(org, self._monthyear)
 
-        # update placeholders
-        if file_type == "HPI":
-            prs_sub_1.text = "As of {0} month, end/{1}".format(
-                self._monthname_long, self._current_quarter
-            )
-        elif file_type == "L1 ORG":
-            prs_sub_1.text = "{0} (As of {1} month, end/{2})".format(
-                org, self._monthname_long, self._current_quarter
-            )
+    #     # set slides to be updated
+    #     prs = Presentation(
+    #         "../Templates/HP_Presentation_Template_" + template_type + ".pptx"
+    #     )
+    #     slide_1 = prs.slides[0]
+    #     slide_4 = prs.slides[3]
+    #     slide_6 = prs.slides[5]
+    #     slide_7 = prs.slides[6]
+    #     slide_8 = prs.slides[7]
+    #     slide_9 = prs.slides[8]
 
-        prs_sub_4.text = (
-            self._fiscal_quarter + " " + self._current_quarter + " Headcount"
-        )
+    #     # set placeholders to be updated
+    #     prs_sub_1 = slide_1.placeholders[1]
+    #     prs_sub_4 = slide_4.placeholders[0]
+    #     prs_sub_6 = slide_6.placeholders[0]
+    #     prs_sub_7 = slide_7.placeholders[0]
+    #     prs_sub_8 = slide_8.placeholders[0]
+    #     prs_sub_9 = slide_9.placeholders[0]
 
-        prs_sub_6.text = "{0}/{1} Status to Diversity Targets (Company Level)".format(
-            self._monthname_short, self._current_quarter
-        )
-        prs_sub_7.text = "{0}/{1} Active Headcount by Organization / MRU".format(
-            self._monthname_short, self._current_quarter
-        )
-        prs_sub_8.text = (
-            "{0}/{1} Active Headcount by Organization / MRU (Absolute values)".format(
-                self._monthname_short, self._current_quarter
-            )
-        )
-        prs_sub_9.text = "{0}/{1} US Ethnic Groups Not Self-Identified HC by Organization / MRU".format(
-            self._monthname_short, self._current_quarter
-        )
+    #     # update placeholders
+    #     if file_type == "HPI":
+    #         prs_sub_1.text = "As of {0} month, end/{1}".format(
+    #             self._monthname_long, self._current_quarter
+    #         )
+    #     elif file_type == "L1 ORG":
+    #         prs_sub_1.text = "{0} (As of {1} month, end/{2})".format(
+    #             org, self._monthname_long, self._current_quarter
+    #         )
 
-        # save updated template
-        prs.save(
-            self.__output_path
-            + "Quarterly Dashboards\\"
-            + file_type
-            + "\\"
-            + output_file
-            + ".pptx"
-        )
+    #     prs_sub_4.text = (
+    #         self._fiscal_quarter + " " + self._current_quarter + " Headcount"
+    #     )
+
+    #     prs_sub_6.text = "{0}/{1} Status to Diversity Targets (Company Level)".format(
+    #         self._monthname_short, self._current_quarter
+    #     )
+    #     prs_sub_7.text = "{0}/{1} Active Headcount by Organization / MRU".format(
+    #         self._monthname_short, self._current_quarter
+    #     )
+    #     prs_sub_8.text = (
+    #         "{0}/{1} Active Headcount by Organization / MRU (Absolute values)".format(
+    #             self._monthname_short, self._current_quarter
+    #         )
+    #     )
+    #     prs_sub_9.text = "{0}/{1} US Ethnic Groups Not Self-Identified HC by Organization / MRU".format(
+    #         self._monthname_short, self._current_quarter
+    #     )
+
+    #     # save updated template
+    #     prs.save(
+    #         self.__output_path
+    #         + "Quarterly Dashboards\\"
+    #         + file_type
+    #         + "\\"
+    #         + output_file
+    #         + ".pptx"
+    #     )
