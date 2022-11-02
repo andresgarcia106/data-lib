@@ -420,11 +420,11 @@ class Data:
                         file_password,
                     )
 
-                if security_method == "RMS":
-                    wb.save(output_path)
+                if security_method == "RMS":                    
                     active_book = xw.books.active
                     for auth_user in auth_users:
                         active_book.api.Permission.Add(auth_user, 15)
+                    wb.save(output_path)
                     wb.close()
                     app.quit()
             else:
