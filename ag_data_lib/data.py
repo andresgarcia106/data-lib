@@ -94,10 +94,12 @@ class Data:
                     self._pass_path = custom_path
             else:
                 paths = create_path()
-                self._input_path = paths[0]
-                self._output_path = paths[1]
-                self._query_path = paths[2]
-                self._pass_path = paths[3]
+                (
+                    self._input_path,
+                    self._output_path,
+                    self._query_path,
+                    self._pass_path,
+                ) = paths
 
     def run_sql_query(self, query, db_engine, **kwargs):
         """
