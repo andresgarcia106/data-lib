@@ -11,7 +11,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='ag-data-lib',
-    version='0.3.6',
+    version='0.3.8',
     url='https://github.com/jgarciaf106/dataLib',
     license='',
     author='Andres Garcia',
@@ -43,6 +43,7 @@ setup(
         "black>=22.3.0",
         "pyxlsb>=1.0.9",
         "plotly==5.7.0",
-        "nbconvert>=6.5.0"
+        "nbconvert>=6.5.0",
+        "snowflake-sqlalchemy>=1.4.4"
     ]
 )

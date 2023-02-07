@@ -6,12 +6,12 @@ import pandas as pd
 import xlwings as xw
 from xlwings.utils import rgb_to_int
 from .utils import *
+from snowflake.sqlalchemy import URL
 from sqlalchemy import create_engine
 
 
 class DB:
     def __init__(self, db_config):
-
         self._cfg = db_config
 
     def set_engine(self):
@@ -45,6 +45,15 @@ class DB:
             ),
             "sqlite": self._cfg["connstring"].format(
                 self._cfg["server"], self._cfg["database"]
+            ),
+            "snowflake": URL(
+                account=self._cfg["account"],
+                user=self._cfg["user"],
+                password=self._cfg["password"],
+                database=self._cfg["database"],
+                schema=self._cfg["schema"],
+                warehouse=self._cfg["warehouse"],
+                role=self._cfg["role"],
             ),
         }
 
