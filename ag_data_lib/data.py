@@ -46,19 +46,15 @@ class DB:
             "sqlite": self._cfg["connstring"].format(
                 self._cfg["server"], self._cfg["database"]
             ),
-            "snowflake": URL(
-                account=self._cfg["account"],
-                user=self._cfg["user"],
-                password=self._cfg["password"],
-                database=self._cfg["database"],
-                schema=self._cfg["schema"],
-                warehouse=self._cfg["warehouse"],
-                role=self._cfg["role"],
+            "teradata": self._cfg["connstring"].format(
+                self._cfg["user"],
+                self._cfg["password"],
+                self._cfg["host"],
+                self._cfg["database"],
             ),
         }
 
         return create_engine(engines.get(self._cfg["type"]))
-
 
 class Data:
     def __init__(self, config):
@@ -162,37 +158,6 @@ class Data:
             else reader(file_path, **kwargs)
         )
         return out_df
-
-    def _password_tracker(self, request_date, output_file_name, password):
-        """
-        :param request_date: The date and time when the request was made
-        :param output_file_name: The name of the file that will be generated
-        :param password: The password to protect the output file. If None, the file will be unprotected
-        """
-
-        file_name = "password_tracker.json"
-        json_obj = []
-
-        if os.path.isfile(self._pass_path + file_name) is False:
-            with open(self._pass_path + file_name, "w"):
-                pass
-
-        # Read JSON file
-        if os.stat(self._pass_path + file_name).st_size != 0:
-            with open(self._pass_path + file_name) as get_content:
-                json_obj = json.load(get_content)
-
-        json_obj.append(
-            {
-                "Request Date": str(request_date),
-                "File Name": output_file_name,
-                "Path": self._output_path,
-                "Password": "Unprotected" if password is None else password,
-            }
-        )
-
-        with open(self._pass_path + file_name, "w") as json_file:
-            json.dump(json_obj, json_file, indent=4, separators=(",", ": "))
 
     def _file_saver(self, data, file_name, protect_file, security_method, auth_users):
         """
