@@ -8,6 +8,10 @@ jobs:
     name: Create Release
     runs-on: ubuntu-latest
     steps:
+      - name: Delete latest Release
+        uses: cb80/delrel@v0.15.0
+        with:
+          tag: latest
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Install dependencies
@@ -29,7 +33,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }} 
-          release_name: Release ${{ github.ref }}
+          release_name: Data Lib Latest Release
           body: |
             Changes in this Release
             - Bug fixes and improvements.
