@@ -1,7 +1,7 @@
 on:
   push:
-    tags:
-      - v*
+    branches:
+      - main
 name: Create Release
 jobs:
   build:
@@ -40,8 +40,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/release/ag-data-lib.tar.gz
-          asset_name: ag-data-lib.tar.gz
+          asset_path: dist/release/data-lib.tar.gz
+          asset_name: data-lib.tar.gz
           asset_content_type: application/gzip
       - name: Publish release
         uses: StuYarrow/publish-release@v1.1.2
