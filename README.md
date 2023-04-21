@@ -2,8 +2,11 @@
 A small library for gathering data and creating reports.
 
 ### Installation
-```
-pip install https://github.com/jgarciaf106/dataLib/releases/latest/download/ag-data-lib.tar.gz
+Create a new conda environment or virtual env
+```cmd
+
+conda create -n <<env_name>> python=3.8 && conda activate <<my_env>> && pip install https://github.com/andresgarcia106/data-lib/releases/latest/download/ag-data-lib.tar.gz
+
 ```
 
 ### Getting started
@@ -97,5 +100,12 @@ c-notebook -n my_notebook_name # to create a notebook with a custom name
 
 ```
 
+# Deactivate your conda environment
+
+Run the following command on your terminal:
+```cmd
+c-deactivate # to deactivate your conda environment
+
+```
 
 

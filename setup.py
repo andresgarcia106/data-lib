@@ -17,7 +17,7 @@ requirements = in_reqs.split("\n")
 setup(
     name='data-lib',
     version='0.0.1',
-    url='https://github.com/jgarciaf106/dataLib',
+    url='https://github.com/andresgarcia106/data-lib/',
     license='',
     author='Andres Garcia',
     author_email='andres_garcia@hakkoda.io',
