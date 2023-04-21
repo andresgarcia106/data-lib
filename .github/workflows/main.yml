@@ -26,9 +26,9 @@ jobs:
           mv dist/*.tar.gz dist/data-lib.tar.gz
           sudo cp dist/data-lib.tar.gz /home/
           export TERM=xterm
-      - name: Create release
+      - name: Github Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: elgohr/Github-Release-Action@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
