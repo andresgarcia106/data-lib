@@ -11,7 +11,7 @@ jobs:
       - name: Delete latest Release
         uses: cb80/delrel@v0.15.0
         with:
-          tag: ${{ github.run_number }}
+          tag: ${{ github.run_id }}
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Install dependencies
@@ -32,7 +32,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.run_number}}
+          tag_name: ${{ github.run_id }}
           release_name: Data Lib Latest Release
           body: |
             Changes in this Release
