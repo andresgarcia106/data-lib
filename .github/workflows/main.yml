@@ -16,11 +16,10 @@ jobs:
           pip install wheel setuptools twine
       - name: Build data-lib
         run: |
-          clear && rm -r -f build data-lib.egg-info dist &&
+          rm -r -f build data-lib.egg-info dist &&
           python setup.py sdist bdist_wheel &&
           twine check dist/* &&
-          mkdir ./dist/release &&
-          cp dist/*.tar.gz dist/release/data-lib.tar.gz
+          dist/*.tar.gz dist/data-lib.tar.gz
           export TERM=xterm
       - name: Create release
         id: create_release
@@ -41,7 +40,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/release/data-lib.tar.gz
+          asset_path: ./dist/data-lib.tar.gz
           asset_name: data-lib.tar.gz
           asset_content_type: application/gzip
       - name: Publish release
