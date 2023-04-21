@@ -21,6 +21,7 @@ jobs:
           twine check dist/* &&
           mkdir ./dist/release &&
           cp dist/*.tar.gz dist/release/data-lib.tar.gz
+          export TERM=xterm
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
