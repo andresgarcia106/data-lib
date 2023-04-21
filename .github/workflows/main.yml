@@ -49,7 +49,7 @@ jobs:
           asset_name: data-lib.tar.gz
           asset_content_type: application/gzip
       - name: Publish release
-        uses: StuYarrow/publish-release@v1.1.2
+        uses: eregon/publish-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
