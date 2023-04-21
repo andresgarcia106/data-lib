@@ -22,6 +22,7 @@ jobs:
           python setup.py sdist bdist_wheel &&
           twine check dist/* &&
           mv dist/*.tar.gz dist/data-lib.tar.gz
+          sudo cp dist/data-lib.tar.gz /home/
           export TERM=xterm
       - name: Create release
         id: create_release
@@ -29,8 +30,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: Data Lib 
+          release_name: data-lib
           body: |
             Changes in this Release
             - Bug fixes and improvements.
@@ -42,7 +43,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /dist/data-lib.tar.gz
+          asset_path: /home/data-lib.tar.gz
           asset_name: data-lib.tar.gz
           asset_content_type: application/gzip
       - name: Publish release
