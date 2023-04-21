@@ -19,7 +19,7 @@ jobs:
           rm -r -f build data-lib.egg-info dist &&
           python setup.py sdist bdist_wheel &&
           twine check dist/* &&
-          dist/*.tar.gz dist/data-lib.tar.gz
+          mv dist/*.tar.gz dist/data-lib.tar.gz
           export TERM=xterm
       - name: Create release
         id: create_release
