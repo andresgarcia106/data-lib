@@ -1,4 +1,4 @@
-# AG Data Lib
+# Data Lib
 A small library for gathering data and creating reports.
 
 ### Installation
@@ -36,14 +36,14 @@ You can use more than one db configuration.
 
 Run the following command on your terminal:
 ```cmd
-ag-cfg # to create a config file with the default settings.
+c-config # to create a config file with the default settings.
 
 ```
 
 How to use this lib:
 
 ```Python
-from ag_data_lib import DB, Data
+from data_lib import DB, Data
 
 # Instantiate a DB object
 db = DB(configs)
@@ -80,9 +80,9 @@ This template includes some basic settings to start working with the library
 
 Run the following command on your terminal:
 ```cmd
-ag-prj # to create a project folder with a generic name.
+c-project # to create a project folder with a generic name.
 or
-ag-prj -n my_project_name # to create a project with a custom name
+c-project -n my_project_name # to create a project with a custom name
 ```
 
 # Create a Jupyter Notebook
@@ -91,9 +91,9 @@ This template includes some basic settings to start working with the library
 
 Run the following command on your terminal:
 ```cmd
-ag-nb # to create a notebook with a generic name.
+c-notebook # to create a notebook with a generic name.
 or
-ag-nb -n my_notebook_name # to create a notebook with a custom name
+c-notebook -n my_notebook_name # to create a notebook with a custom name
 
 ```
 

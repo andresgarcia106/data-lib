@@ -8,43 +8,30 @@ HERE = path.abspath(path.dirname(__file__))
 # Get the long description from the README file
 with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
+    
+# get requiments
+in_reqs = open("requirements.txt", "r").read()
+requirements = in_reqs.split("\n")
+
 
 setup(
-    name='ag-data-lib',
-    version='0.3.9',
+    name='data-lib',
+    version='0.0.1',
     url='https://github.com/jgarciaf106/dataLib',
     license='',
     author='Andres Garcia',
-    author_email='jgarciaf106@gmail.com',
+    author_email='andres_garcia@hakkoda.io',
     description='Analytics and Reporting',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=['ag_data_lib'],
+    packages=['data_lib'],
     include_package_data=True,
     entry_points={
         "console_scripts": [
-            "ag-nb=ag_data_lib.scripts.new_notebook:main",
-            "ag-cfg=ag_data_lib.scripts.new_config:main",
-            "ag-prj=ag_data_lib.scripts.new_project:main",
+            "c_notebook=data_lib.scripts.new_notebook:main",
+            "c-config=data_lib.scripts.new_config:main",
+            "c-project=data_lib.scripts.new_project:main",
         ],
     },
-    install_requires=[
-        "setuptools>=62.0.0",
-        "pyodbc>=4.0.32",
-        "pandas>=1.4.2",
-        "numpy>=1.21.5",
-        "xlwings>=0.27.14",
-        "openpyxl>=3.0.9",
-        "matplotlib>=3.5.1",
-        "seaborn>=0.11.2",
-        "pymongo>=4.0.2",
-        "sqlalchemy>=1.4.34",
-        "pytest>=7.1.1",
-        "black>=22.3.0",
-        "pyxlsb>=1.0.9",
-        "plotly==5.7.0",
-        "nbconvert>=6.5.0",
-        "snowflake-sqlalchemy>=1.4.4",
-        "teradataml>=17.20.0.2",
-    ]
+    install_requires=requirements
 )

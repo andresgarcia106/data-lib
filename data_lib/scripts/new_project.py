@@ -81,7 +81,7 @@ def generate_nb(path):
     )[0]
 
     
-    notebook = "ag_notebook"
+    notebook = "jupyter_notebook_sample"
     shutil.copy2(notebook_template, cwd +  f"{path}/01_notebooks/{notebook}.ipynb")
 
 def main():
@@ -91,8 +91,8 @@ def main():
     """
     cwd = os.getcwd() + "\\"
     
-    project_directories = ["01_notebooks","02_data","03_python_scripts"]
-    project_subdirectories = ["01_input_files","02_output_files","03_query_files","04_password_files"]
+    project_directories = ["01_notebooks","02_data","03_src","04_data_models"]
+    project_subdirectories = ["01_input_files","02_output_files","03_query_files","04_archived_files"]
     
     # create directories    
     root_path = create_directories(project_directories, project_subdirectories)     

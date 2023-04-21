@@ -1,4 +1,5 @@
 # library imports
+from dbcon import DBCon 
 import os
 import json
 import win32com.client
@@ -10,59 +11,14 @@ from snowflake.sqlalchemy import URL
 from sqlalchemy import create_engine
 
 
-class DB:
-    def __init__(self, db_config):
-        self._cfg = db_config
-
-    def set_engine(self):
-        """
-        It takes a dictionary of connection strings and returns the connection string for the database
-        type specified in the config file
-        :return: The create_engine function is being returned.
-        """
-
-        engines = {
-            "postgres": self._cfg["connstring"].format(
-                self._cfg["user"],
-                self._cfg["password"],
-                self._cfg["server"],
-                self._cfg["database"],
-            ),
-            "mssql": self._cfg["connstring"].format(
-                self._cfg["server"], self._cfg["database"]
-            ),
-            "oracle": self._cfg["connstring"].format(
-                self._cfg["user"],
-                self._cfg["password"],
-                self._cfg["server"],
-                self._cfg["database"],
-            ),
-            "mysql": self._cfg["connstring"].format(
-                self._cfg["user"],
-                self._cfg["password"],
-                self._cfg["server"],
-                self._cfg["database"],
-            ),
-            "sqlite": self._cfg["connstring"].format(
-                self._cfg["server"], self._cfg["database"]
-            ),
-            "teradata": self._cfg["connstring"].format(
-                self._cfg["user"],
-                self._cfg["password"],
-                self._cfg["host"],
-                self._cfg["database"],
-            ),
-        }
-
-        return create_engine(engines.get(self._cfg["type"]))
-
-class Data:
-    def __init__(self, config):
+class DataGetter (DBCon):
+    def __init__(self, db_cfg, data_cfg):
         """
         The __init__ function is called when an instance of the class is created.
         :param config: The config object that was created in the previous step
         """
-        self._cfg = config
+        super().__init__(db_cfg)
+        self._cfg = data_cfg
         self._root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
         self._output_path = None
         self._query_path = None
@@ -106,7 +62,7 @@ class Data:
                     self._pass_path,
                 ) = paths
 
-    def run_sql_query(self, query, db_engine, **kwargs):
+    def run_sql_query(self, query, **kwargs):
         """
         If the query is a file, then read the file and pass it to the database engine. If the query is a
         string, then pass the string to the database engine
@@ -115,6 +71,8 @@ class Data:
         :param db_engine: the database engine
         :return: A dataframe
         """
+        db_engine = self.set_engine()
+        
         out_df = pd.DataFrame()
 
         if os.path.exists(self._query_path + f"{query}.sql"):
@@ -133,12 +91,14 @@ class Data:
 
         return out_df
 
-    def execute_sql_query(self, query, db_engine):
+    def execute_sql_query(self, query):
         """
         Execute a query file or inline query using the engine
 
         :param query: The name or file name of the sql script to execute
         """
+        db_engine = self.set_engine()
+        
         db_engine.execute(query) if os.path.exists(
             self._query_path + f"{query}.sql"
         ) else db_engine.execute(query)

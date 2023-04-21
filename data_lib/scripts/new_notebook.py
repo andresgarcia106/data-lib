@@ -39,7 +39,7 @@ def main():
     cwd = os.getcwd() + "\\"
     root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     notebook_template = glob.glob(
-        root_path + "/**/notebook_template.ipynb", recursive=True
+        root_path + "/**/jupyter_notebook_sample.ipynb", recursive=True
     )[0]
 
     if get_args(sys.argv) != "":
