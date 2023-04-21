@@ -19,13 +19,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python3 -m pip install --upgrade pip
+          pip install --upgrade pip
           pip install wheel setuptools twine
 
       - name: Build and Publish
         run: |
           clear && rm -r -f build ag_data_lib.egg-info dist &&
-          python3 setup.py sdist bdist_wheel &&
+          python setup.py sdist bdist_wheel &&
           twine check dist/* &&
           mkdir ./dist/release &&
           cp dist/*.tar.gz dist/release/ag-data-lib.tar.gz
