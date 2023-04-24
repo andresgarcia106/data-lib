@@ -40,7 +40,7 @@ setup(
         "seaborn>=0.12.2",
         "pymongo>=4.3.3",
         "teradataml>=17.20.0.2",
-        "sqlalchemy>=2.0.10",
+        "sqlalchemy>=1.4.0, <2.0.0",
         "pytest>=7.3.1",
         "black>=23.3.0",
         "pyxlsb>=1.0.10",
