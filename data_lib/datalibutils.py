@@ -30,7 +30,7 @@ def create_path():
     output_path = []
     root = os.path.dirname(os.getcwd())
     target_dir = "02_data"
-    paths = ["01_input_files", "02_output_files", "03_query_files", "04_password_files"]
+    paths = ["01_input_files","02_input_query","03_stage_files","04_output_files","04_archived_files"]
 
     for path in paths:
         if not os.path.isdir(root + f"\\{target_dir}\\{path}"):

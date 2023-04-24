@@ -48,4 +48,5 @@ setup(
         "nbconvert>=7.3.1",
         "snowflake-sqlalchemy>=1.4.7",
         "snowflake-snowpark-python>=1.3.0",
+        "keyring>=23.13.1",
     ])

@@ -13,29 +13,24 @@ pip install https://github.com/andresgarcia106/data-lib/releases/latest/download
 ```
 
 ### Getting started
-Create a config.py file, where you place your settings database config and data reporting configs, e.g:
+Create a config.cfg file, where you place your settings database config and data reporting configs, e.g:
 
-```Python 
-db_config = {
-    "connstring": "mssql+pyodbc://{0}/{1}?trusted_connection=yes&driver=ODBC+Driver+17+for+SQL+Server",
-    "type": "mssql",
-    "server": "db server",
-    "database": "db name",
-}
+```cfg 
 
+[database]
+# type = teradata, oracle, mysql, postgres, mssql, snowflake
+# connstring = teradatasql://username:password@host/?database=database
+type = {provider}
+connstring =  {provider}://{username}:{password}@{host}/?database={database}
 
-data_config = {
-    "input": "path",
-    "load": "path",
-    "output": "path",
-    "queries": "path",
-    "report_key": "Key", # any string that will help generate a random password for your files
-    "font_name": "Arial",
-    "header_font_size": 13,
-    "header_font_color": 0xFFFFFF,
-    "header_bg_color": (0, 150, 214),
-    "content_font_size": 12,
-}
+[data]
+input = /02_data/01_input_files/
+queries =  /02_data/02_input_query/
+stage = /02_data/03_stage_files/
+output =  /02_data/04_output_files/
+archived = /02_data/04_archived_files/
+report_key =  Key # any string that will help generate a random password for your files
+
 ```
 
 You can use more than one db configuration.
@@ -49,11 +44,10 @@ c-config # to create a config file with the default settings.
 How to use this lib:
 
 ```Python
-from data_lib import DB, Data
+from data_lib import DataGetter
 
 # Instantiate a DB object
-db = DB(configs)
-od = Data(configs)
+db = DataGetter(db_config, data_config)
 
 # set db engine
 engine_one = db.set_engine()
@@ -62,21 +56,24 @@ engine_one = db.set_engine()
 # if folders do not exist will be created automatically
 od.set_path()
 
-# Set custom paths for input, output, query and password tracker default folders
+# Set custom paths for input, queries, staging, output and archive default folders
 # Paths you can Set:
 - input_data
-- output_data
 - query_files
-- pass_tracker
+- stage_data
+- output_data
+- archived_data
 
 od.set_path(set_custom_path=True, path_type="input_data", custom_path="./custom/path")
 ```
-Remember to import your config dictionaries from your config.py like:
+Remember to import your config dictionaries from your config.cfg:
 
-```Python 
-from config import * 
-or
-from config import config_one, config_two etc...
+```cfg
+config = configparser.RawConfigParser()
+config.read('../config.cfg')
+
+db_config = dict(config.items('database'))
+data_config = dict(config.items('data'))
 
 ```
 
