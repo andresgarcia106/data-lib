@@ -5,7 +5,10 @@ A small library for gathering data and creating reports.
 Create a new conda environment or virtual env
 ```cmd
 
-conda create -n <<env_name>> python=3.8 && conda activate <<my_env>> && pip install https://github.com/andresgarcia106/data-lib/releases/latest/download/data-lib.tar.gz
+conda create -n <<env_name>> python=3.8 && 
+conda activate <<my_env>> && 
+conda instal pip &&
+pip install https://github.com/andresgarcia106/data-lib/releases/latest/download//data-lib.tar.gz
 
 ```
 
