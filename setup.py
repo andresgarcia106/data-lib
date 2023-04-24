@@ -23,9 +23,9 @@ setup(
     include_package_data=True,
     entry_points={
         "console_scripts": [
-            "c_notebook=data_lib.scripts.new_notebook:main",
-            "c-config=data_lib.scripts.new_config:main",
-            "c-project=data_lib.scripts.new_project:main",
+            "c_notebook=scripts.new_notebook:main",
+            "c-config=scripts.new_config:main",
+            "c-project=scripts.new_project:main",
         ],
     },
     install_requires=[

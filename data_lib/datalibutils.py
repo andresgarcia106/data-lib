@@ -1,6 +1,5 @@
 import os
 import datetime as dt
-from pptx import Presentation
 from traitlets.config import Config
 import nbformat as nbf
 from nbconvert.exporters import HTMLExporter
