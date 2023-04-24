@@ -8,10 +8,10 @@ jobs:
     name: Create Release
     runs-on: ubuntu-latest
     steps:
-      - name: Delete latest Release
-        uses: cb80/delrel@v0.15.0
+      - name: Delete releases
+        uses: dev-drprasad/delete-older-releases@v0.2
         with:
-          tag: ${{ github.run_id }}
+          keep_latest: 0
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Install dependencies
