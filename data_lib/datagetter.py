@@ -6,9 +6,8 @@ import win32com.client
 import pandas as pd
 import xlwings as xw
 from xlwings.utils import rgb_to_int
-from .utils import *
+from .datalibutils import *
 from snowflake.sqlalchemy import URL
-from sqlalchemy import create_engine
 
 
 class DataGetter (DBCon):
@@ -147,19 +146,8 @@ class DataGetter (DBCon):
         ws = wb.sheets[0]
         ws.name = "Data Export"
 
-        # excel data header formatting
+        # excel data 
         ws.range("A1").options(pd.DataFrame, index=False).value = number_to_string(data)
-        header_format = ws.range("A1").expand("right")
-        header_format.color = rgb_to_int(eval(self._cfg["header_bg_color"]))
-        header_format.api.Font.Name = self._cfg["font_name"]
-        header_format.font.color = rgb_to_int(eval(self._cfg["header_font_color"]))
-        header_format.api.Font.Bold = True
-        header_format.api.Font.Size = self._cfg["header_font_size"]
-
-        # excel data content formatting
-        data_format = ws.range("A2").current_region
-        data_format.api.Font.Name = self._cfg["font_name"]
-        data_format.api.Font.Size = eval(self._cfg["content_font_size"])
 
         # save password protect file if needed
         try:

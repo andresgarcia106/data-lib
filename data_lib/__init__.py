@@ -1,2 +1,2 @@
-from data_lib.datagetter import DB, Data
-from data_lib.utils import create_folder_tree, notebook_to_html
+from data_lib.datagetter import DataGetter
+from data_lib.datalibutils import create_folder_tree, notebook_to_html
