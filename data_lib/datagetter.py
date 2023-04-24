@@ -7,7 +7,6 @@ import pandas as pd
 import xlwings as xw
 from xlwings.utils import rgb_to_int
 from .datalibutils import *
-from snowflake.sqlalchemy import URL
 
 
 class DataGetter (DBCon):
@@ -19,10 +18,11 @@ class DataGetter (DBCon):
         super().__init__(db_cfg)
         self._cfg = data_cfg
         self._root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-        self._output_path = None
-        self._query_path = None
         self._input_path = None
-        self._pass_path = None
+        self._query_path = None
+        self._stage_path = None
+        self._output_path = None      
+        self._archived_path = None
 
     def set_path(
         self,
@@ -39,26 +39,35 @@ class DataGetter (DBCon):
         """
         if set_cfg_paths:
             self._input_path = self._root_path + self._cfg["input"]
-            self._output_path = self._root_path + self._cfg["output"]
             self._query_path = self._root_path + self._cfg["queries"]
-            self._pass_path = self._root_path + self._cfg["tracker"]
+            self._output_path = self._root_path + self._cfg["stage"]
+            self._output_path = self._root_path + self._cfg["output"]
+            self._pass_path = self._root_path + self._cfg["archived"]
         else:
             if set_custom_path:
-                if path_type == "output_data":
-                    self._output_path = custom_path
-                elif path_type == "query_files":
-                    self._query_path = custom_path
-                elif path_type == "input_data":
+                if path_type == "input_data":
                     self._input_path = custom_path
-                elif path_type == "pass_tracker":
+                    
+                if path_type == "query_files":
+                    self._input_path = custom_path
+            
+                if path_type == "stage_data":
+                    self._output_path = custom_path
+                    
+                if path_type == "output_data":
+                    self._query_path = custom_path
+                
+                if path_type == "archived_data":
                     self._pass_path = custom_path
             else:
                 paths = create_path()
                 (
                     self._input_path,
-                    self._output_path,
                     self._query_path,
-                    self._pass_path,
+                    self._stage_path,
+                    self._output_path,     
+                    self._archived_path,
+                    
                 ) = paths
 
     def run_sql_query(self, query, **kwargs):
