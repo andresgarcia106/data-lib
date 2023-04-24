@@ -1,5 +1,4 @@
 # library imports
-from dbcon import DBCon 
 import os
 import json
 import win32com.client
@@ -7,6 +6,7 @@ import pandas as pd
 import xlwings as xw
 from xlwings.utils import rgb_to_int
 from .datalibutils import *
+from .dbcon import DBCon 
 
 
 class DataGetter (DBCon):
