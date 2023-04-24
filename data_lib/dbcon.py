@@ -1,3 +1,4 @@
+from sqlalchemy import create_engine
 
 class DBCon:
     def __init__(self, db_cfg):
@@ -11,39 +12,13 @@ class DBCon:
         """
 
         engines = {
-            "postgres": self._cfg["connstring"].format(
-                self._cfg["user"],
-                self._cfg["password"],
-                self._cfg["server"],
-                self._cfg["database"],
-            ),
-            "mssql": self._cfg["connstring"].format(
-                self._cfg["server"], self._cfg["database"]
-            ),
-            "oracle": self._cfg["connstring"].format(
-                self._cfg["user"],
-                self._cfg["password"],
-                self._cfg["server"],
-                self._cfg["database"],
-            ),
-            "mysql": self._cfg["connstring"].format(
-                self._cfg["user"],
-                self._cfg["password"],
-                self._cfg["server"],
-                self._cfg["database"],
-            ),
-            "sqlite": self._cfg["connstring"].format(
-                self._cfg["user"],
-                self._cfg["password"],
-                self._cfg["server"],
-                self._cfg["database"],
-            ),
-            "teradata": self._cfg["connstring"].format(
-                self._cfg["user"],
-                self._cfg["password"],
-                self._cfg["server"],
-                self._cfg["database"],
-            ),
+            "postgres": self._cfg["connstring"],
+            "mssql": self._cfg["connstring"],
+            "oracle": self._cfg["connstring"],
+            "mysql": self._cfg["connstring"],
+            "sqlite": self._cfg["connstring"],
+            "teradata": self._cfg["connstring"],            
+            "snowflake": self._cfg["connstring"],
         }
 
         return create_engine(engines.get(self._cfg["type"]))
