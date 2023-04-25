@@ -11,7 +11,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='data-lib',
-    version='0.0.4',
+    version='0.0.5',
     url='https://github.com/andresgarcia106/data-lib/',
     license='',
     author='Andres Garcia',
@@ -23,9 +23,9 @@ setup(
     include_package_data=True,
     entry_points={
         "console_scripts": [
-            "c-notebook=Scripts.new_notebook:main",
-            "c-config=Scripts.new_config:main",
-            "c-project=Scripts.new_project:main",
+            "c-notebook=new_notebook:main",
+            "c-config=new_config:main",
+            "c-project=new_project:main",
         ],
     },
     install_requires=[
