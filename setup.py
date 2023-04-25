@@ -23,9 +23,9 @@ setup(
     include_package_data=True,
     entry_points={
         "console_scripts": [
-            "c-notebook=new_notebook:main",
-            "c-config=new_config:main",
-            "c-project=new_project:main",
+            "crnotebook=new_notebook:main",
+            "crconfig=new_config:main",
+            "crproject=new_project:main",
         ],
     },
     install_requires=[
