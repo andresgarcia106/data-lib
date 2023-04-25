@@ -11,7 +11,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='data-lib',
-    version='0.0.7',
+    version='0.0.8',
     url='https://github.com/andresgarcia106/data-lib/',
     license='',
     author='Andres Garcia',
