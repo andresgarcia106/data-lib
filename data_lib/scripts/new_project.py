@@ -77,7 +77,7 @@ def generate_nb(path):
     cwd = os.getcwd() + "\\"
     root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     notebook_template = glob.glob(
-        root_path + "/**/notebook_template.ipynb", recursive=True
+        root_path + "/**/jupyter_notebook_sample.ipynb", recursive=True
     )[0]
 
     
@@ -92,7 +92,7 @@ def main():
     cwd = os.getcwd() + "\\"
     
     project_directories = ["01_notebooks","02_data","03_src","04_data_models"]
-    project_subdirectories = ["01_input_files","02_input_query","03_stage_files","04_output_files","04_archived_files"]
+    project_subdirectories = ["01_input_files","02_input_query","03_stage_files","04_output_files","05_archived_files"]
     
     # create directories    
     root_path = create_directories(project_directories, project_subdirectories)     
