@@ -1,5 +1,3 @@
 include data_lib/templates/jupyter_notebook_sample.ipynb
-include data_lib/templates/config_template.cfg
 include data_lib/scripts/new_notebook.py
-include data_lib/scripts/new_config.py
 include data_lib/scripts/new_project.py
