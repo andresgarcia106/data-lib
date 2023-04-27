@@ -1,4 +1,4 @@
-import kr as kr, datetime as dt, nbformat as nbf, os
+import keyring as kr, datetime as dt, nbformat as nbf, os
 from nbconvert.exporters import HTMLExporter
 from nbconvert.preprocessors import TagRemovePreprocessor
 from traitlets.config import Config

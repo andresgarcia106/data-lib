@@ -2,8 +2,8 @@ from sqlalchemy import create_engine
 from snowflake.sqlalchemy import URL
 
 class DBCon:
-    def __init__(self, db_cfg):
-        self._db_cfg = db_cfg
+    def __init__(self):
+        pass
 
     def set_engine(self, uri):
         """
