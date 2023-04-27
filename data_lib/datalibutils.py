@@ -228,7 +228,7 @@ def create_database_uri(provider, schema=None, warehouse=None):
         if schema:
             db_uri += f"?charset=utf8mb4&local_infile=1&autocommit=true&cursorclass=pymysql.cursors.DictCursor&database={schema}"
     elif provider == "teradata":
-        db_uri = f"teradata://{credentials[0]}:{credentials[1]}@{credentials[2]}/DATABASE={credentials[4]},CHARSET=UTF8"
+        db_uri = f"teradatasql://{credentials[0]}:{credentials[1]}@{credentials[2]}/DATABASE={credentials[4]},CHARSET=UTF8"
     elif provider == "postgresql":
         db_uri = f"postgresql://{credentials[0]}:{credentials[1]}@{credentials[2]}:{credentials[3]}/{credentials[4]}"
     elif provider == "sqlite":
