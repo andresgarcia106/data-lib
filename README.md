@@ -16,6 +16,18 @@ pip install https://github.com/andresgarcia106/data-lib/releases/latest/download
 
 How to use this lib:
 
+This library used Keyring so you'll need to create the following Keys in:
+    - Windows Password Manager
+    - Mac Keychain
+    - Linux Secret Service
+
+Required Keys
+    - username "provider_username"
+    - password "provider_password"
+    - host "provider_host"
+    - port "provider_port"
+    - database "provider_database"
+
 ```Python
 from data_lib import DataGetter
 
