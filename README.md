@@ -22,11 +22,25 @@ This library used Keyring so you'll need to create the following Keys in:
     - Linux Secret Service
 
 Required Keys
-    - username "provider_username"
-    - password "provider_password"
-    - host "provider_host"
-    - port "provider_port"
-    - database "provider_database"
+    - Service:
+        - Proviver_U
+            - username = "provider_username"
+            - password = "username"
+        - Provider_P
+            - username = "provider_password"
+            - password = "password"
+        - Provider_H
+            - username = "provider_host"
+            - password = "host"
+        - Provider_A 
+            - username = "provider_port"
+            - password = "port"
+        - Provider_D
+            - username = "provider_database"
+            - password = "database"
+
+Note: **** Replce <<Provider>> and <<provider>> for your database provider.
+
 
 ```Python
 from data_lib import DataGetter
