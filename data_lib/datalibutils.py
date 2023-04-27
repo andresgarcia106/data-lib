@@ -1,9 +1,8 @@
-import os
-import datetime as dt
-from traitlets.config import Config
-import nbformat as nbf
+import kr as kr, datetime as dt, nbformat as nbf, os
 from nbconvert.exporters import HTMLExporter
 from nbconvert.preprocessors import TagRemovePreprocessor
+from traitlets.config import Config
+
 
 # delete existing file
 def file_cleaner(file_name):
@@ -18,25 +17,6 @@ def file_cleaner(file_name):
 
     if os.path.exists(file_name):
         os.remove(file_name)
-
-
-# create default folders
-def create_path():
-    """
-    It creates a list of paths to be created, then it creates them
-    :return: A list of paths to the directories created.
-    """
-    output_path = []
-    root = os.path.dirname(os.getcwd())
-    target_dir = "02_data"
-    paths = ["01_input_files","02_input_query","03_stage_files","04_output_files","04_archived_files"]
-
-    for path in paths:
-        if not os.path.isdir(root + f"\\{target_dir}\\{path}"):
-            os.mkdir(root + f"\\{target_dir}\\{path}")
-            output_path.append(root + f"\\{target_dir}\\{path}")
-
-    return output_path
 
 
 # trims whitespaces
@@ -156,7 +136,6 @@ def notebook_to_html(notebook_path, html_path):
 
 
 def create_folder_tree(root_folder, sub_dir_folder, folder_list, path):
-
     # Create directory
     try:
         # Create target Directory
@@ -174,3 +153,91 @@ def create_folder_tree(root_folder, sub_dir_folder, folder_list, path):
             print(f"Directory {folder} created")
         except FileExistsError:
             print("Directory ", folder, " already exists")
+
+
+def get_database_credentials(provider):
+    """
+    Retrieves the database credentials for the given provider and database name from the kr.
+    """
+    # Map the provider names to the corresponding kr service names
+    kr_services = {
+        "mssql": "MSSQL",
+        "mysql": "MySQL",
+        "teradata": "Teradata",
+        "postgresql": "PostgreSQL",
+        "sqlite": "SQLite",
+        "snowflake": "Snowflake",
+    }
+
+    # Validate the provider name
+    if provider not in kr_services:
+        raise ValueError(
+            f"Unsupported provider: {provider}. Supported providers: {', '.join(kr_services.keys())}"
+        )
+
+    # Get the database credentials from the kr
+    try:
+        username = kr.get_password(kr_services[provider], f"{provider}_username")
+        password = kr.get_password(kr_services[provider], f"{provider}_password")
+        host = kr.get_password(kr_services[provider], f"{provider}_host")
+        port = kr.get_password(kr_services[provider], f"{provider}_port")
+        database = kr.get_password(kr_services[provider], f"{provider}_database")
+    except kr.errors.NokrError:
+        print(f"No kr service available for provider: {provider}.")
+        print(
+            f"To use this function, you must store the database credentials for the {provider} provider in the kr."
+        )
+        print(
+            f"Use the following key names in the kr: {provider}_username, {provider}_password, {provider}_host, {provider}_port, {provider}_database (if applicable)"
+        )
+        return None
+    except kr.errors.PasswordSetError:
+        print(
+            f"Error retrieving database credentials from kr for provider: {provider}."
+        )
+        print(
+            f"Make sure the database credentials are stored in the kr using the following key names: {provider}_username, {provider}_password, {provider}_host, {provider}_port, {database_name}_database (if applicable)"
+        )
+        return None
+
+    # Validate the database credentials
+    if not all([username, password, host, port, database]):
+        print(
+            f"Missing or incomplete database credentials for provider: {provider}"
+        )
+        print(
+            f"Make sure the following keys are set in the kr: {provider}_username, {provider}_password, {provider}_host, {provider}_port, {provider}_database (if applicable)"
+        )
+        return None
+
+    return username, password, host, port, database
+
+
+def create_database_uri(provider, schema=None, warehouse=None):
+    """Generates a database URI for the given provider using the credentials stored in the keyring.
+    Supported providers: mssql, mysql, teradata, postgresql, sqlite, snowflake, amazon, azure.
+    """
+
+    # Get the database credentials from the keyring
+    credentials = get_database_credentials(provider)
+    # # Generate the database URI
+    if provider == "mssql":
+        db_uri = f"mssql+pyodbc://{credentials[0]}:{credentials[1]}@{credentials[2]}:{credentials[3]}/{credentials[4]}?driver=ODBC+Driver+17+for+SQL+Server"
+    elif provider == "mysql":
+        db_uri = f"mysql+pymysql://{credentials[0]}:{credentials[1]}@{credentials[2]}:{credentials[3]}/{credentials[4]}"
+        if schema:
+            db_uri += f"?charset=utf8mb4&local_infile=1&autocommit=true&cursorclass=pymysql.cursors.DictCursor&database={schema}"
+    elif provider == "teradata":
+        db_uri = f"teradata://{credentials[0]}:{credentials[1]}@{credentials[2]}/DATABASE={credentials[4]},CHARSET=UTF8"
+    elif provider == "postgresql":
+        db_uri = f"postgresql://{credentials[0]}:{credentials[1]}@{credentials[2]}:{credentials[3]}/{credentials[4]}"
+    elif provider == "sqlite":
+        db_uri = f"sqlite:///{credentials[4]}"
+    elif provider == "snowflake":
+        db_uri = f"snowflake://{credentials[0]}:{credentials[1]}@{credentials[2]}/{credentials[4]}?warehouse={warehouse}&role=SYSADMIN&schema={schema}&authenticator=externalbrowser"
+    else:
+        raise ValueError(
+            f"Unsupported provider: {provider}. Supported providers: mssql, mysql, teradata, postgresql, sqlite, snowflake."
+        )
+
+    return db_uri

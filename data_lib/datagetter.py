@@ -16,20 +16,17 @@ class DataGetter (DBCon):
         :param config: The config object that was created in the previous step
         """
         super().__init__(db_cfg)
-        self._cfg = data_cfg
+        self._data_cfg = data_cfg
         self._root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+        self._uri = None
         self._input_path = None
         self._query_path = None
         self._stage_path = None
         self._output_path = None      
         self._archived_path = None
 
-    def set_path(
-        self,
-        set_cfg_paths=True,
-        set_custom_path=False,
-        path_type=None,
-        custom_path=None,
+    def set_config(
+        self, provider
     ):
         """
         :param set_custom_path: If you want to set a custom path, set this to True, defaults to False
@@ -37,38 +34,14 @@ class DataGetter (DBCon):
         :param path_type: The type of path you want to set
         :param custom_path: the path to the folder where the files are located
         """
-        if set_cfg_paths:
-            self._input_path = self._root_path + self._cfg["input"]
-            self._query_path = self._root_path + self._cfg["queries"]
-            self._output_path = self._root_path + self._cfg["stage"]
-            self._output_path = self._root_path + self._cfg["output"]
-            self._pass_path = self._root_path + self._cfg["archived"]
-        else:
-            if set_custom_path:
-                if path_type == "input_data":
-                    self._input_path = custom_path
-                    
-                if path_type == "query_files":
-                    self._input_path = custom_path
-            
-                if path_type == "stage_data":
-                    self._output_path = custom_path
-                    
-                if path_type == "output_data":
-                    self._query_path = custom_path
-                
-                if path_type == "archived_data":
-                    self._pass_path = custom_path
-            else:
-                paths = create_path()
-                (
-                    self._input_path,
-                    self._query_path,
-                    self._stage_path,
-                    self._output_path,     
-                    self._archived_path,
-                    
-                ) = paths
+        
+        self._uri = create_config_file(provider)
+        self._input_path = self._root_path + "/02_data/01_input_files/"
+        self._query_path = self._root_path + "/02_data/02_input_files/"
+        self._stage_path = self._root_path + "/02_data/03_input_files/"
+        self._output_path = self._root_path + "/02_data/04_input_files/"
+        self._archived_path = self._root_path + "/02_data/05_input_files/"
+        
 
     def run_sql_query(self, query, **kwargs):
         """
@@ -79,7 +52,7 @@ class DataGetter (DBCon):
         :param db_engine: the database engine
         :return: A dataframe
         """
-        db_engine = self.set_engine()
+        db_engine = self.set_engine(self._uri)
         
         out_df = pd.DataFrame()
 
@@ -105,7 +78,7 @@ class DataGetter (DBCon):
 
         :param query: The name or file name of the sql script to execute
         """
-        db_engine = self.set_engine()
+        db_engine = self.set_engine(self._uri)
         
         db_engine.execute(query) if os.path.exists(
             self._query_path + f"{query}.sql"
@@ -162,7 +135,7 @@ class DataGetter (DBCon):
         try:
             if protect_file:
                 if security_method == "PWD":
-                    file_password = password_generator(self._cfg["report_key"])
+                    file_password = password_generator("PWD")
                     wb.save(output_path)
                     wb.close()
                     app.quit()

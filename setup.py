@@ -11,7 +11,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='data-lib',
-    version='0.0.9',
+    version='0.1.0',
     url='https://github.com/andresgarcia106/data-lib/',
     license='',
     author='Andres Garcia',
@@ -24,7 +24,6 @@ setup(
     entry_points={
         "console_scripts": [
             "crnotebook=data_lib.scripts.new_notebook:main",
-            "crconfig=data_lib.scripts.new_config:main",
             "crproject=data_lib.scripts.new_project:main",
         ],
     },
