@@ -34,7 +34,7 @@ class DataGetter (DBCon):
         :param custom_path: the path to the folder where the files are located
         """
         
-        self._uri = create_config_file(provider)
+        self._uri = create_database_uri(provider)
         self._input_path = self._root_path + "/02_data/01_input_files/"
         self._query_path = self._root_path + "/02_data/02_input_files/"
         self._stage_path = self._root_path + "/02_data/03_input_files/"

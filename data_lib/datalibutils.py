@@ -177,11 +177,11 @@ def get_database_credentials(provider):
 
     # Get the database credentials from the kr
     try:
-        username = kr.get_password(kr_services[provider], f"{provider}_username")
-        password = kr.get_password(kr_services[provider], f"{provider}_password")
-        host = kr.get_password(kr_services[provider], f"{provider}_host")
-        port = kr.get_password(kr_services[provider], f"{provider}_port")
-        database = kr.get_password(kr_services[provider], f"{provider}_database")
+        username = kr.get_password(kr_services[provider] + "_U", f"{provider}_username")
+        password = kr.get_password(kr_services[provider] + "_P", f"{provider}_password")
+        host = kr.get_password(kr_services[provider] + "_H", f"{provider}_host")
+        port = kr.get_password(kr_services[provider] + "_A", f"{provider}_port")
+        database = kr.get_password(kr_services[provider] + "_D", f"{provider}_database")
     except kr.errors.NokrError:
         print(f"No kr service available for provider: {provider}.")
         print(
@@ -206,7 +206,7 @@ def get_database_credentials(provider):
             f"Missing or incomplete database credentials for provider: {provider}"
         )
         print(
-            f"Make sure the following keys are set in the kr: {provider}_username, {provider}_password, {provider}_host, {provider}_port, {provider}_database (if applicable)"
+            f"Make sure the following keys are set in the system keyring service: {provider}_username, {provider}_password, {provider}_host, {provider}_port, {provider}_database (if applicable)"
         )
         return None
 
@@ -228,7 +228,7 @@ def create_database_uri(provider, schema=None, warehouse=None):
         if schema:
             db_uri += f"?charset=utf8mb4&local_infile=1&autocommit=true&cursorclass=pymysql.cursors.DictCursor&database={schema}"
     elif provider == "teradata":
-        db_uri = f"teradatasql://{credentials[0]}:{credentials[1]}@{credentials[2]}/DATABASE={credentials[4]},CHARSET=UTF8"
+        db_uri = f"teradatasql://{credentials[0]}:{credentials[1]}@{credentials[2]}/?DATABASE={credentials[4]}"
     elif provider == "postgresql":
         db_uri = f"postgresql://{credentials[0]}:{credentials[1]}@{credentials[2]}:{credentials[3]}/{credentials[4]}"
     elif provider == "sqlite":
