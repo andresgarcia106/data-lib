@@ -10,13 +10,12 @@ from .dbcon import DBCon
 
 
 class DataGetter (DBCon):
-    def __init__(self, db_cfg, data_cfg):
+    def __init__(self):
         """
         The __init__ function is called when an instance of the class is created.
         :param config: The config object that was created in the previous step
         """
-        super().__init__(db_cfg)
-        self._data_cfg = data_cfg
+        super().__init__()
         self._root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
         self._uri = None
         self._input_path = None
