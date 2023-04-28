@@ -36,10 +36,10 @@ class DataGetter (DBCon):
         
         self._uri = create_database_uri(provider)
         self._input_path = self._root_path + "/02_data/01_input_files/"
-        self._query_path = self._root_path + "/02_data/02_input_files/"
-        self._stage_path = self._root_path + "/02_data/03_input_files/"
-        self._output_path = self._root_path + "/02_data/04_input_files/"
-        self._archived_path = self._root_path + "/02_data/05_input_files/"
+        self._query_path = self._root_path + "/02_data/02_input_query/"
+        self._stage_path = self._root_path + "/02_data/03_stage_files/"
+        self._output_path = self._root_path + "/02_data/04_output_files/"
+        self._archived_path = self._root_path + "/02_data/05_archived_files/"
         
 
     def run_sql_query(self, query, **kwargs):

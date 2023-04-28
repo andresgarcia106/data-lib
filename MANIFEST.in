@@ -1,3 +1,4 @@
 include data_lib/templates/jupyter_notebook_sample.ipynb
+include data_lib/templates/project_utils_template.py
 include data_lib/scripts/new_notebook.py
 include data_lib/scripts/new_project.py
