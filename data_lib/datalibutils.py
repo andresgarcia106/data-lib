@@ -2,6 +2,7 @@ import keyring as kr, datetime as dt, nbformat as nbf, os
 from nbconvert.exporters import HTMLExporter
 from nbconvert.preprocessors import TagRemovePreprocessor
 from traitlets.config import Config
+from snowflake.sqlalchemy import URL
 
 
 # delete existing file
@@ -155,7 +156,7 @@ def create_folder_tree(root_folder, sub_dir_folder, folder_list, path):
             print("Directory ", folder, " already exists")
 
 
-def get_database_credentials(provider):
+def get_database_credentials(input_provider):
     """
     Retrieves the database credentials for the given provider and database name from the kr.
     """
@@ -167,8 +168,12 @@ def get_database_credentials(provider):
         "postgresql": "PostgreSQL",
         "sqlite": "SQLite",
         "snowflake": "Snowflake",
+        "snowflakeSSO": "Snowflake",
     }
-
+    
+    # convert input provider to lower match casing
+    provider = input_provider.lower()
+    
     # Validate the provider name
     if provider not in kr_services:
         raise ValueError(
@@ -235,6 +240,12 @@ def create_database_uri(provider, schema=None, warehouse=None):
         db_uri = f"sqlite:///{credentials[4]}"
     elif provider == "snowflake":
         db_uri = f"snowflake://{credentials[0]}:{credentials[1]}@{credentials[2]}/{credentials[4]}?warehouse={warehouse}&role=SYSADMIN&schema={schema}&authenticator=externalbrowser"
+    elif provider == "snowflakeSSO":
+        db_uri = URL(
+                    account = credentials[2],
+                    user = credentials[0],
+                    authenticator = 'externalbrowser'
+                )
     else:
         raise ValueError(
             f"Unsupported provider: {provider}. Supported providers: mssql, mysql, teradata, postgresql, sqlite, snowflake."
