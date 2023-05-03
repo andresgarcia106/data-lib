@@ -1,5 +1,4 @@
 from sqlalchemy import create_engine
-from snowflake.sqlalchemy import URL
 
 class DBCon:
     def __init__(self):
