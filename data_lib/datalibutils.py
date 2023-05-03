@@ -168,7 +168,7 @@ def get_database_credentials(input_provider):
         "postgresql": "PostgreSQL",
         "sqlite": "SQLite",
         "snowflake": "Snowflake",
-        "snowflakeSSO": "Snowflake",
+        "snowflakesso": "Snowflake",
     }
     
     # convert input provider to lower match casing
@@ -182,11 +182,16 @@ def get_database_credentials(input_provider):
 
     # Get the database credentials from the kr
     try:
-        username = kr.get_password(kr_services[provider] + "_U", f"{provider}_username")
-        password = kr.get_password(kr_services[provider] + "_P", f"{provider}_password")
-        host = kr.get_password(kr_services[provider] + "_H", f"{provider}_host")
-        port = kr.get_password(kr_services[provider] + "_A", f"{provider}_port")
-        database = kr.get_password(kr_services[provider] + "_D", f"{provider}_database")
+        if provider != 'snowflakesso':
+            username = kr.get_password(kr_services[provider] + "_U", f"{provider}_username")
+            password = kr.get_password(kr_services[provider] + "_P", f"{provider}_password")
+            host = kr.get_password(kr_services[provider] + "_H", f"{provider}_host")
+            port = kr.get_password(kr_services[provider] + "_A", f"{provider}_port")
+            database = kr.get_password(kr_services[provider] + "_D", f"{provider}_database")
+        else:
+            username = kr.get_password(kr_services[provider] + "_U", f"{provider}_username")
+            host = kr.get_password(kr_services[provider] + "_H", f"{provider}_host")
+            
     except kr.errors.NokrError:
         print(f"No kr service available for provider: {provider}.")
         print(
