@@ -211,16 +211,28 @@ def get_database_credentials(input_provider):
         return None
 
     # Validate the database credentials
-    if not all([username, password, host, port, database]):
-        print(
-            f"Missing or incomplete database credentials for provider: {provider}"
-        )
-        print(
-            f"Make sure the following keys are set in the system keyring service: {provider}_username, {provider}_password, {provider}_host, {provider}_port, {provider}_database (if applicable)"
-        )
-        return None
+    if provider != "snowflakesso":
+        if not all([username, password, host, port, database]):
+            print(
+                f"Missing or incomplete database credentials for provider: {provider}"
+            )
+            print(
+                f"Make sure the following keys are set in the system keyring service: {provider}_username, {provider}_password, {provider}_host, {provider}_port, {provider}_database (if applicable)"
+            )
+            return None
 
-    return username, password, host, port, database
+        return username, password, host, port, database
+    else:
+        if not all([username, host]):
+            print(
+                f"Missing or incomplete database credentials for provider: {provider}"
+            )
+            print(
+                f"Make sure the following keys are set in the system keyring service: {provider}_username, {provider}_password, {provider}_host, {provider}_port, {provider}_database (if applicable)"
+            )
+            return None
+
+        return username, host
 
 
 def create_database_uri(provider, schema=None, warehouse=None):
