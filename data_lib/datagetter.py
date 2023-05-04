@@ -42,7 +42,7 @@ class DataGetter (DBCon):
         self._archived_path = self._root_path + "/02_data/05_archived_files/"
         
 
-    def run_sql_query(self, query, **kwargs):
+    def run_sql_query(self, query, snowflake = False, **kwargs):
         """
         If the query is a file, then read the file and pass it to the database engine. If the query is a
         string, then pass the string to the database engine
@@ -51,7 +51,11 @@ class DataGetter (DBCon):
         :param db_engine: the database engine
         :return: A dataframe
         """
-        db_engine = self.set_engine(self._uri)
+        if snowflake:
+            db_engine = self.set_engine(self._uri)
+            db_engine = db_engine.connect()
+        else:
+            db_engine = self.set_engine(self._uri)
         
         out_df = pd.DataFrame()
 

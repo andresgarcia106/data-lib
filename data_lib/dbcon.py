@@ -1,3 +1,4 @@
+import snowflake.connector
 from sqlalchemy import create_engine
 
 class DBCon:
