@@ -230,8 +230,8 @@ def validate_credentials(provider):
 
         return username, password, host, port, database
     else:
+        username, host = get_kr_credentials(provider)
         if not all([username, host]):
-            username, host = get_kr_credentials(provider)
             print(
                 f"Missing or incomplete database credentials for provider: {provider}"
             )
@@ -267,7 +267,7 @@ def create_database_uri(provider, schema=None, warehouse=None):
         db_uri = f"snowflake://{credentials[0]}:{credentials[1]}@{credentials[2]}/{credentials[4]}?warehouse={warehouse}&role=SYSADMIN&schema={schema}&authenticator=externalbrowser"
     elif provider == "snowflakesso":
         db_uri = URL(
-                    account = credentials[2],
+                    account = credentials[1],
                     user = credentials[0],
                     authenticator = 'externalbrowser'
                 )
