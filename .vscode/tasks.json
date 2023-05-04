@@ -22,7 +22,7 @@
         {
             "label": "local install",
             "type": "shell",
-            "command": "clear && python -m pip install ./dist/release/ag-data-lib.tar.gz",
+            "command": "clear && conda activate dev_test && python -m pip install ./dist/data-lib.tar.gz",
 			"presentation": {
 				"close": true
 			}
