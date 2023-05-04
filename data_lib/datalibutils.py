@@ -155,8 +155,9 @@ def create_folder_tree(root_folder, sub_dir_folder, folder_list, path):
         except FileExistsError:
             print("Directory ", folder, " already exists")
 
+        
 
-def get_database_credentials(input_provider):
+def get_kr_credentials(input_provider):
     """
     Retrieves the database credentials for the given provider and database name from the kr.
     """
@@ -168,7 +169,7 @@ def get_database_credentials(input_provider):
         "postgresql": "PostgreSQL",
         "sqlite": "SQLite",
         "snowflake": "Snowflake",
-        "snowflakesso": "Snowflake",
+        "snowflakesso": "SnowflakeSSO",
     }
     
     # convert input provider to lower match casing
@@ -188,9 +189,11 @@ def get_database_credentials(input_provider):
             host = kr.get_password(kr_services[provider] + "_H", f"{provider}_host")
             port = kr.get_password(kr_services[provider] + "_A", f"{provider}_port")
             database = kr.get_password(kr_services[provider] + "_D", f"{provider}_database")
+            return username, password, host, port, database
         else:
             username = kr.get_password(kr_services[provider] + "_U", f"{provider}_username")
             host = kr.get_password(kr_services[provider] + "_H", f"{provider}_host")
+            return username, host
             
     except kr.errors.NokrError:
         print(f"No kr service available for provider: {provider}.")
@@ -206,12 +209,16 @@ def get_database_credentials(input_provider):
             f"Error retrieving database credentials from kr for provider: {provider}."
         )
         print(
-            f"Make sure the database credentials are stored in the kr using the following key names: {provider}_username, {provider}_password, {provider}_host, {provider}_port, {database_name}_database (if applicable)"
+            f"Make sure the database credentials are stored in the kr using the following key names: {provider}_username, {provider}_host (if applicable)"
         )
         return None
+    
+def validate_credentials(provider):
+# Validate the database credentials
 
-    # Validate the database credentials
+    
     if provider != "snowflakesso":
+        username, password, host, port, database = get_kr_credentials(provider)
         if not all([username, password, host, port, database]):
             print(
                 f"Missing or incomplete database credentials for provider: {provider}"
@@ -224,6 +231,7 @@ def get_database_credentials(input_provider):
         return username, password, host, port, database
     else:
         if not all([username, host]):
+            username, host = get_kr_credentials(provider)
             print(
                 f"Missing or incomplete database credentials for provider: {provider}"
             )
@@ -231,8 +239,8 @@ def get_database_credentials(input_provider):
                 f"Make sure the following keys are set in the system keyring service: {provider}_username, {provider}_password, {provider}_host, {provider}_port, {provider}_database (if applicable)"
             )
             return None
-
         return username, host
+
 
 
 def create_database_uri(provider, schema=None, warehouse=None):
@@ -241,7 +249,7 @@ def create_database_uri(provider, schema=None, warehouse=None):
     """
 
     # Get the database credentials from the keyring
-    credentials = get_database_credentials(provider)
+    credentials = validate_credentials(provider)
     # # Generate the database URI
     if provider == "mssql":
         db_uri = f"mssql+pyodbc://{credentials[0]}:{credentials[1]}@{credentials[2]}:{credentials[3]}/{credentials[4]}?driver=ODBC+Driver+17+for+SQL+Server"
@@ -257,7 +265,7 @@ def create_database_uri(provider, schema=None, warehouse=None):
         db_uri = f"sqlite:///{credentials[4]}"
     elif provider == "snowflake":
         db_uri = f"snowflake://{credentials[0]}:{credentials[1]}@{credentials[2]}/{credentials[4]}?warehouse={warehouse}&role=SYSADMIN&schema={schema}&authenticator=externalbrowser"
-    elif provider == "snowflakeSSO":
+    elif provider == "snowflakesso":
         db_uri = URL(
                     account = credentials[2],
                     user = credentials[0],
