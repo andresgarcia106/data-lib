@@ -19,3 +19,11 @@ class DBCon:
             engine = create_engine(uri)
         
         return engine
+    
+    def create_sf_session(self, uri):
+        """
+        Creates a Snowflake session
+        """
+        session = None
+        session = Session.builder.configs(self._uri).create()
+        return session

@@ -27,6 +27,7 @@ class DataGetter (DBCon):
         self._stage_path = None
         self._output_path = None      
         self._archived_path = None
+        self._sf_session = None
 
     def set_config(
         self, provider
@@ -45,6 +46,8 @@ class DataGetter (DBCon):
         self._output_path = self._root_path + "/02_data/04_output_files/"
         self._archived_path = self._root_path + "/02_data/05_archived_files/"
         
+    def set_session(self):
+        self._sf_session = self.create_sf_session(self._uri)
 
     def run_sql_query(self, query, snowflake = False, **kwargs):
         """
@@ -55,7 +58,6 @@ class DataGetter (DBCon):
         :param db_engine: the database engine
         :return: A dataframe
         """
-        
         db_engine = self.set_engine(self._uri)
         out_df = pd.DataFrame()
         query_exists = os.path.exists(self._query_path + f"{query}.sql")
@@ -64,17 +66,17 @@ class DataGetter (DBCon):
             if query_exists:
                 if kwargs == {}:
                     file_query = open(self._query_path + f"{query}.sql").read()
-                    out_df = db_engine.sql(file_query).to_pandas()
+                    out_df = self._sf_session.sql(file_query).to_pandas()
                 else:
                     with open(self._query_path + f"{query}.sql") as get:
                         file_query = get.read()
-                    out_df = db_engine.sql(file_query.format(**kwargs)).to_pandas()
+                    out_df = self._sf_session.sql(file_query.format(**kwargs)).to_pandas()
             else:
                 if kwargs == {}:
-                    out_df = db_engine.sql(file_query).to_pandas()
+                    out_df = self._sf_session.sql(file_query).to_pandas()
                 else:
-                    out_df = db_engine.sql(file_query.format(**kwargs)).to_pandas()
-            db_engine.close()
+                    out_df = self._sf_session.sql(file_query.format(**kwargs)).to_pandas()
+            self._sf_session.close()
         else:
             if query_exists:
                 if kwargs == {}:
@@ -101,10 +103,10 @@ class DataGetter (DBCon):
         db_engine = self.set_engine(self._uri)
         
         if snowflake:
-            db_engine.sql(query).collect() if os.path.exists(
+            self._sf_session.sql(query).collect() if os.path.exists(
                 self._query_path + f"{query}.sql"
-                 ) else db_engine.sql(query).collect()
-            db_engine.close()
+                 ) else self._sf_session.sql(query).collect()
+            self._sf_session.close()
         else:
             db_engine.execute(query) if os.path.exists(
                 self._query_path + f"{query}.sql"
