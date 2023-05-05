@@ -2,7 +2,6 @@ import keyring as kr, datetime as dt, nbformat as nbf, os
 from nbconvert.exporters import HTMLExporter
 from nbconvert.preprocessors import TagRemovePreprocessor
 from traitlets.config import Config
-from snowflake.sqlalchemy import URL
 
 
 # delete existing file
@@ -266,11 +265,11 @@ def create_database_uri(provider, schema=None, warehouse=None):
     elif provider == "snowflake":
         db_uri = f"snowflake://{credentials[0]}:{credentials[1]}@{credentials[2]}/{credentials[4]}?warehouse={warehouse}&role=SYSADMIN&schema={schema}&authenticator=externalbrowser"
     elif provider == "snowflakesso":
-        db_uri = URL(
-                    account = credentials[1],
-                    user = credentials[0],
-                    authenticator = 'externalbrowser'
-                )
+        db_uri = {"account": credentials[1],
+                    "user": credentials[0],
+                    "authenticator": 'externalbrowser'}
+                    
+                
     else:
         raise ValueError(
             f"Unsupported provider: {provider}. Supported providers: mssql, mysql, teradata, postgresql, sqlite, snowflake."

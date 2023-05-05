@@ -1,12 +1,16 @@
 # library imports
 import os
 import json
-import win32com.client
+import platform as pt
 import pandas as pd
 import xlwings as xw
 from xlwings.utils import rgb_to_int
 from .datalibutils import *
 from .dbcon import DBCon 
+
+
+if pt.system() == "Windows":
+   import win32com.client
 
 
 class DataGetter (DBCon):
@@ -51,31 +55,44 @@ class DataGetter (DBCon):
         :param db_engine: the database engine
         :return: A dataframe
         """
-        if snowflake:
-            db_engine = self.set_engine(self._uri)
-            db_engine = db_engine.connect()
-        else:
-            db_engine = self.set_engine(self._uri)
         
+        db_engine = self.set_engine(self._uri)
         out_df = pd.DataFrame()
-
-        if os.path.exists(self._query_path + f"{query}.sql"):
-            if kwargs == {}:
-                file_query = open(self._query_path + f"{query}.sql").read()
-                out_df = pd.read_sql_query(file_query, db_engine)
+        query_exists = os.path.exists(self._query_path + f"{query}.sql")
+        
+        if snowflake:
+            if query_exists:
+                if kwargs == {}:
+                    file_query = open(self._query_path + f"{query}.sql").read()
+                    out_df = db_engine.sql(file_query).to_pandas()
+                else:
+                    with open(self._query_path + f"{query}.sql") as get:
+                        file_query = get.read()
+                    out_df = db_engine.sql(file_query.format(**kwargs)).to_pandas()
             else:
-                with open(self._query_path + f"{query}.sql") as get:
-                    file_query = get.read()
-                out_df = pd.read_sql_query(file_query.format(**kwargs), db_engine)
+                if kwargs == {}:
+                    out_df = db_engine.sql(file_query).to_pandas()
+                else:
+                    out_df = db_engine.sql(file_query.format(**kwargs)).to_pandas()
+            db_engine.close()
         else:
-            if kwargs == {}:
-                out_df = pd.read_sql_query(query, db_engine)
+            if query_exists:
+                if kwargs == {}:
+                    file_query = open(self._query_path + f"{query}.sql").read()
+                    out_df = pd.read_sql_query(file_query, db_engine)
+                else:
+                    with open(self._query_path + f"{query}.sql") as get:
+                        file_query = get.read()
+                    out_df = pd.read_sql_query(file_query.format(**kwargs), db_engine)
             else:
-                out_df = pd.read_sql_query(query.format(**kwargs), db_engine)
+                if kwargs == {}:
+                    out_df = pd.read_sql_query(query, db_engine)
+                else:
+                    out_df = pd.read_sql_query(query.format(**kwargs), db_engine)
 
         return out_df
 
-    def execute_sql_query(self, query):
+    def execute_sql_query(self, query, snowflake=False):
         """
         Execute a query file or inline query using the engine
 
@@ -83,9 +100,15 @@ class DataGetter (DBCon):
         """
         db_engine = self.set_engine(self._uri)
         
-        db_engine.execute(query) if os.path.exists(
-            self._query_path + f"{query}.sql"
-        ) else db_engine.execute(query)
+        if snowflake:
+            db_engine.sql(query).collect() if os.path.exists(
+                self._query_path + f"{query}.sql"
+                 ) else db_engine.sql(query).collect()
+            db_engine.close()
+        else:
+            db_engine.execute(query) if os.path.exists(
+                self._query_path + f"{query}.sql"
+            ) else db_engine.execute(query)
 
     def read_file(self, reader, file_path, **kwargs):
         """
