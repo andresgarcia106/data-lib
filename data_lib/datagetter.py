@@ -21,16 +21,15 @@ class DataGetter (DBCon):
         """
         super().__init__()
         self._root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-        self._uri = None
-        self._input_path = None
-        self._query_path = None
-        self._stage_path = None
-        self._output_path = None      
-        self._archived_path = None
-        self._sf_session = None
+        self._input_path = self._root_path + "/02_data/01_input_files/"
+        self._query_path = self._root_path + "/02_data/02_input_query/"
+        self._stage_path = self._root_path + "/02_data/03_stage_files/"
+        self._output_path = self._root_path + "/02_data/04_output_files/"      
+        self._archived_path = self._root_path + "/02_data/05_archived_files/"
+        self.__engine =  None
 
-    def set_config(
-        self, provider
+    def init_database(
+        self, provider, environment
     ):
         """
         :param set_custom_path: If you want to set a custom path, set this to True, defaults to False
@@ -38,18 +37,11 @@ class DataGetter (DBCon):
         :param path_type: The type of path you want to set
         :param custom_path: the path to the folder where the files are located
         """
+        db_uri = create_database_uri(provider, environment)
+        self.__engine = self.set_engine(db_uri)
         
-        self._uri = create_database_uri(provider)
-        self._input_path = self._root_path + "/02_data/01_input_files/"
-        self._query_path = self._root_path + "/02_data/02_input_query/"
-        self._stage_path = self._root_path + "/02_data/03_stage_files/"
-        self._output_path = self._root_path + "/02_data/04_output_files/"
-        self._archived_path = self._root_path + "/02_data/05_archived_files/"
-        
-    def set_session(self):
-        self._sf_session = self.create_sf_session(self._uri)
 
-    def run_sql_query(self, query, snowflake = False, **kwargs):
+    def run_sql_query(self, query, **kwargs):
         """
         If the query is a file, then read the file and pass it to the database engine. If the query is a
         string, then pass the string to the database engine
@@ -58,59 +50,36 @@ class DataGetter (DBCon):
         :param db_engine: the database engine
         :return: A dataframe
         """
-        db_engine = self.set_engine(self._uri)
+       
         out_df = pd.DataFrame()
         query_exists = os.path.exists(self._query_path + f"{query}.sql")
         
-        if snowflake:
-            if query_exists:
-                if kwargs == {}:
-                    file_query = open(self._query_path + f"{query}.sql").read()
-                    out_df = self._sf_session.sql(file_query).to_pandas()
-                else:
-                    with open(self._query_path + f"{query}.sql") as get:
-                        file_query = get.read()
-                    out_df = self._sf_session.sql(file_query.format(**kwargs)).to_pandas()
+        if query_exists:
+            if kwargs == {}:
+                file_query = open(self._query_path + f"{query}.sql").read()
+                out_df = pd.read_sql_query(file_query, self.__engine)
             else:
-                if kwargs == {}:
-                    out_df = self._sf_session.sql(file_query).to_pandas()
-                else:
-                    out_df = self._sf_session.sql(file_query.format(**kwargs)).to_pandas()
-            self._sf_session.close()
+                with open(self._query_path + f"{query}.sql") as get:
+                    file_query = get.read()
+                out_df = pd.read_sql_query(file_query.format(**kwargs), self.__engine)
         else:
-            if query_exists:
-                if kwargs == {}:
-                    file_query = open(self._query_path + f"{query}.sql").read()
-                    out_df = pd.read_sql_query(file_query, db_engine)
-                else:
-                    with open(self._query_path + f"{query}.sql") as get:
-                        file_query = get.read()
-                    out_df = pd.read_sql_query(file_query.format(**kwargs), db_engine)
+            if kwargs == {}:
+                out_df = pd.read_sql_query(query, self.__engine)
             else:
-                if kwargs == {}:
-                    out_df = pd.read_sql_query(query, db_engine)
-                else:
-                    out_df = pd.read_sql_query(query.format(**kwargs), db_engine)
+                out_df = pd.read_sql_query(query.format(**kwargs), self.__engine)
 
         return out_df
 
-    def execute_sql_query(self, query, snowflake=False):
+    def execute_sql_query(self, query,):
         """
         Execute a query file or inline query using the engine
 
         :param query: The name or file name of the sql script to execute
         """
-        db_engine = self.set_engine(self._uri)
         
-        if snowflake:
-            self._sf_session.sql(query).collect() if os.path.exists(
+        self.__engine.execute(query) if os.path.exists(
                 self._query_path + f"{query}.sql"
-                 ) else self._sf_session.sql(query).collect()
-            self._sf_session.close()
-        else:
-            db_engine.execute(query) if os.path.exists(
-                self._query_path + f"{query}.sql"
-            ) else db_engine.execute(query)
+            ) else self.__engine.execute(query)
 
     def read_file(self, reader, file_path, **kwargs):
         """
