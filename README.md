@@ -23,30 +23,35 @@ This library used Keyring so you'll need to create the following Keys in:
 
 Required Keys
     - Service:
-        - Proviver_U
-            - username = "provider_username"
-            - password = "username"
-        - Provider_P
-            - username = "provider_password"
-            - password = "password"
-        - Provider_H
-            - username = "provider_host"
-            - password = "host"
-        - Provider_A 
-            - username = "provider_port"
-            - password = "port"
-        - Provider_D
-            - username = "provider_database"
-            - password = "database"
+        - Provider_Environment_User
+            - username = "username"
+            - password = "database username"
+        - Provider_Environment_Password
+            - username = "password"
+            - password = "database password"
+        - Provider_Environment_Host
+            - username = "host"
+            - password = "host number"
+        - Provider_Environment_Port
+            - username = "port"
+            - password = "port number"
+        - Provider_Environment_Database
+            - username = "database"
+            - password = "database name"
 
-Note: **** Replce <<Provider>> and <<provider>> for your database provider.
+*** Note: **** 
+Replace <<Provider>> for your database provider.
+Replace <<Environment>> for your database environment (Dev, QA, Stg, Prd etc..)
 
 
 ```Python
 from data_lib import DataGetter
 
 # Instantiate a DB object
-db = DataGetter("<<DB Provider>>")
+db = DataGetter()
+
+# run init_database to connect a Database
+db.init_database("<<DB Provider>>", "<<Environment>>")
 
 ```
 
@@ -58,12 +63,6 @@ db = DataGetter("<<DB Provider>>")
 "postgresql": "PostgreSQL",
 "sqlite": "SQLite",
 "snowflake": "Snowflake"
-```
-
-# set db configuration
-```Python
-db.set_config()
-
 ```
 
 # Create a Project folder

@@ -156,7 +156,7 @@ def create_folder_tree(root_folder, sub_dir_folder, folder_list, path):
 
         
 
-def get_kr_credentials(input_provider):
+def get_kr_credentials(input_provider, enviroment):
     """
     Retrieves the database credentials for the given provider and database name from the kr.
     """
@@ -168,7 +168,6 @@ def get_kr_credentials(input_provider):
         "postgresql": "PostgreSQL",
         "sqlite": "SQLite",
         "snowflake": "Snowflake",
-        "snowflakesso": "SnowflakeSSO",
     }
     
     # convert input provider to lower match casing
@@ -182,17 +181,13 @@ def get_kr_credentials(input_provider):
 
     # Get the database credentials from the kr
     try:
-        if provider != 'snowflakesso':
-            username = kr.get_password(kr_services[provider] + "_U", f"{provider}_username")
-            password = kr.get_password(kr_services[provider] + "_P", f"{provider}_password")
-            host = kr.get_password(kr_services[provider] + "_H", f"{provider}_host")
-            port = kr.get_password(kr_services[provider] + "_A", f"{provider}_port")
-            database = kr.get_password(kr_services[provider] + "_D", f"{provider}_database")
-            return username, password, host, port, database
-        else:
-            username = kr.get_password(kr_services[provider] + "_U", f"{provider}_username")
-            host = kr.get_password(kr_services[provider] + "_H", f"{provider}_host")
-            return username, host
+        
+        username = kr.get_password(kr_services[provider] + "_" + enviroment + "_User", "username")
+        password = kr.get_password(kr_services[provider]  + "_" + enviroment + "_Password", "password")
+        host = kr.get_password(kr_services[provider] + "_" + enviroment +  "_Host", "host")
+        port = kr.get_password(kr_services[provider] + "_" + enviroment +  "_Port", "port")
+        database = kr.get_password(kr_services[provider] + "_" + enviroment +  "_Database", "database")
+        return username, password, host, port, database
             
     except kr.errors.NokrError:
         print(f"No kr service available for provider: {provider}.")
@@ -200,7 +195,7 @@ def get_kr_credentials(input_provider):
             f"To use this function, you must store the database credentials for the {provider} provider in the kr."
         )
         print(
-            f"Use the following key names in the kr: {provider}_username, {provider}_password, {provider}_host, {provider}_port, {provider}_database (if applicable)"
+            f"Use the following key names in the kr: username, assword, host, port, database (if applicable)"
         )
         return None
     except kr.errors.PasswordSetError:
@@ -208,47 +203,47 @@ def get_kr_credentials(input_provider):
             f"Error retrieving database credentials from kr for provider: {provider}."
         )
         print(
-            f"Make sure the database credentials are stored in the kr using the following key names: {provider}_username, {provider}_host (if applicable)"
+            f"Make sure the database credentials are stored in the kr using the following key names: username, password (if applicable)"
         )
         return None
     
-def validate_credentials(provider):
+def validate_credentials(provider, environment):
 # Validate the database credentials
 
     
-    if provider != "snowflakesso":
-        username, password, host, port, database = get_kr_credentials(provider)
+    if provider != "snowflake":
+        username, password, host, port, database = get_kr_credentials(provider, environment)
         if not all([username, password, host, port, database]):
             print(
                 f"Missing or incomplete database credentials for provider: {provider}"
             )
             print(
-                f"Make sure the following keys are set in the system keyring service: {provider}_username, {provider}_password, {provider}_host, {provider}_port, {provider}_database (if applicable)"
+                f"Make sure the following keys are set in the system keyring service: username, password, host, port, database (if applicable)"
             )
             return None
 
         return username, password, host, port, database
     else:
-        username, host = get_kr_credentials(provider)
+        username, password, host, port, database = get_kr_credentials(provider)
         if not all([username, host]):
             print(
                 f"Missing or incomplete database credentials for provider: {provider}"
             )
             print(
-                f"Make sure the following keys are set in the system keyring service: {provider}_username, {provider}_password, {provider}_host, {provider}_port, {provider}_database (if applicable)"
+                f"Make sure the following keys are set in the system keyring service: username, password, host (if applicable)"
             )
             return None
-        return username, host
+        return username, password, host
 
 
 
-def create_database_uri(provider, schema=None, warehouse=None):
+def create_database_uri(provider, environment, schema=None, role="PUBLIC"):
     """Generates a database URI for the given provider using the credentials stored in the keyring.
     Supported providers: mssql, mysql, teradata, postgresql, sqlite, snowflake, amazon, azure.
     """
 
     # Get the database credentials from the keyring
-    credentials = validate_credentials(provider)
+    credentials = validate_credentials(provider, environment)
     # # Generate the database URI
     if provider == "mssql":
         db_uri = f"mssql+pyodbc://{credentials[0]}:{credentials[1]}@{credentials[2]}:{credentials[3]}/{credentials[4]}?driver=ODBC+Driver+17+for+SQL+Server"
@@ -263,13 +258,11 @@ def create_database_uri(provider, schema=None, warehouse=None):
     elif provider == "sqlite":
         db_uri = f"sqlite:///{credentials[4]}"
     elif provider == "snowflake":
-        db_uri = f"snowflake://{credentials[0]}:{credentials[1]}@{credentials[2]}/{credentials[4]}?warehouse={warehouse}&role=SYSADMIN&schema={schema}&authenticator=externalbrowser"
-    elif provider == "snowflakesso":
-        db_uri = {"account": credentials[1],
-                    "user": credentials[0],
-                    "authenticator": 'externalbrowser'}
-                    
-                
+        if credentials[1] is None:
+            db_uri = f"snowflake://{credentials[0]}@{credentials[2]}?role={role}&authenticator=externalbrowser"
+        else:
+            db_uri = f"snowflake://{credentials[0]}:{credentials[1]}@{credentials[2]}?role={role}"
+          
     else:
         raise ValueError(
             f"Unsupported provider: {provider}. Supported providers: mssql, mysql, teradata, postgresql, sqlite, snowflake."
