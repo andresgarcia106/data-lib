@@ -43,6 +43,9 @@ Required Keys
 Replace <<Provider>> for your database provider.
 Replace <<Environment>> for your database environment (Dev, QA, Stg, Prd etc..)
 
+*** Snowflake SSO: ***
+
+If you will be using Snowflake SSO create your Password Credential with a Blank Password.
 
 ```Python
 from data_lib import DataGetter

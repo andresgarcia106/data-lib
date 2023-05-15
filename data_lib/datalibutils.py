@@ -156,7 +156,7 @@ def create_folder_tree(root_folder, sub_dir_folder, folder_list, path):
 
         
 
-def get_kr_credentials(input_provider, enviroment):
+def get_kr_credentials(input_provider, environment):
     """
     Retrieves the database credentials for the given provider and database name from the kr.
     """
@@ -182,11 +182,11 @@ def get_kr_credentials(input_provider, enviroment):
     # Get the database credentials from the kr
     try:
         
-        username = kr.get_password(kr_services[provider] + "_" + enviroment + "_User", "username")
-        password = kr.get_password(kr_services[provider]  + "_" + enviroment + "_Password", "password")
-        host = kr.get_password(kr_services[provider] + "_" + enviroment +  "_Host", "host")
-        port = kr.get_password(kr_services[provider] + "_" + enviroment +  "_Port", "port")
-        database = kr.get_password(kr_services[provider] + "_" + enviroment +  "_Database", "database")
+        username = kr.get_password(kr_services[provider] + "_" + environment + "_User", "username")
+        password = kr.get_password(kr_services[provider]  + "_" + environment + "_Password", "password")
+        host = kr.get_password(kr_services[provider] + "_" + environment +  "_Host", "host")
+        port = kr.get_password(kr_services[provider] + "_" + environment +  "_Port", "port")
+        database = kr.get_password(kr_services[provider] + "_" + environment +  "_Database", "database")
         return username, password, host, port, database
             
     except kr.errors.NokrError:
@@ -224,7 +224,7 @@ def validate_credentials(provider, environment):
 
         return username, password, host, port, database
     else:
-        username, password, host, port, database = get_kr_credentials(provider)
+        username, password, host, port, database = get_kr_credentials(provider, environment)
         if not all([username, host]):
             print(
                 f"Missing or incomplete database credentials for provider: {provider}"
@@ -258,7 +258,7 @@ def create_database_uri(provider, environment, schema=None, role="PUBLIC"):
     elif provider == "sqlite":
         db_uri = f"sqlite:///{credentials[4]}"
     elif provider == "snowflake":
-        if credentials[1] is None:
+        if credentials[1] == "":
             db_uri = f"snowflake://{credentials[0]}@{credentials[2]}?role={role}&authenticator=externalbrowser"
         else:
             db_uri = f"snowflake://{credentials[0]}:{credentials[1]}@{credentials[2]}?role={role}"
