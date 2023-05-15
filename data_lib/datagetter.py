@@ -16,6 +16,10 @@ if pt.system() == "Windows":
 class DataGetter (DBCon):
     def __init__(self):
         """
+        This is the constructor function for a class that sets up various file paths and initializes a
+        database engine to None.
+        """
+        """
         The __init__ function is called when an instance of the class is created.
         :param config: The config object that was created in the previous step
         """
@@ -26,30 +30,33 @@ class DataGetter (DBCon):
         self._stage_path = self._root_path + "/02_data/03_stage_files/"
         self._output_path = self._root_path + "/02_data/04_output_files/"      
         self._archived_path = self._root_path + "/02_data/05_archived_files/"
-        self.__engine =  None
+        self._engine =  None
 
     def init_database(
+        
         self, provider, environment
     ):
         """
-        :param set_custom_path: If you want to set a custom path, set this to True, defaults to False
-        (optional)
-        :param path_type: The type of path you want to set
-        :param custom_path: the path to the folder where the files are located
+        This function initializes a database engine with a specified provider and environment.
+        
+        :param provider: The type of database provider, such as "mysql", "postgresql", "sqlite", etc
+        :param environment: The environment parameter is used to specify the environment in which the
+        database is being initialized. This could be a development, testing, or production environment,
+        for example. The value of this parameter will be used to create the appropriate database URI for
+        the specified provider
         """
         db_uri = create_database_uri(provider, environment)
-        self.__engine = self.set_engine(db_uri)
+        self._engine = self.set_engine(db_uri)
         
 
     def run_sql_query(self, query, **kwargs):
         """
-        If the query is a file, then read the file and pass it to the database engine. If the query is a
-        string, then pass the string to the database engine
-
-        :param query: The name of the query file to be run
-        :param db_engine: the database engine
-        :return: A dataframe
-        """
+        This function runs a SQL query and returns the results as a pandas dataframe, with the option to
+        pass in parameters using kwargs.
+        
+        :param query: The SQL query to be executed
+        :return: a pandas DataFrame that contains the results of a SQL query.
+        """        
        
         out_df = pd.DataFrame()
         query_exists = os.path.exists(self._query_path + f"{query}.sql")
@@ -57,29 +64,56 @@ class DataGetter (DBCon):
         if query_exists:
             if kwargs == {}:
                 file_query = open(self._query_path + f"{query}.sql").read()
-                out_df = pd.read_sql_query(file_query, self.__engine)
+                out_df = pd.read_sql_query(file_query, self._engine)
             else:
                 with open(self._query_path + f"{query}.sql") as get:
                     file_query = get.read()
-                out_df = pd.read_sql_query(file_query.format(**kwargs), self.__engine)
+                out_df = pd.read_sql_query(file_query.format(**kwargs), self._engine)
         else:
             if kwargs == {}:
-                out_df = pd.read_sql_query(query, self.__engine)
+                out_df = pd.read_sql_query(query, self._engine)
             else:
-                out_df = pd.read_sql_query(query.format(**kwargs), self.__engine)
+                out_df = pd.read_sql_query(query.format(**kwargs), self._engine)
 
         return out_df
 
     def execute_sql_query(self, query,):
         """
-        Execute a query file or inline query using the engine
-
-        :param query: The name or file name of the sql script to execute
+        This function executes a SQL query using a specified engine and query path.
+        
+        :param query: The SQL query to be executed
         """
         
-        self.__engine.execute(query) if os.path.exists(
+        self._engine.execute(query) if os.path.exists(
                 self._query_path + f"{query}.sql"
-            ) else self.__engine.execute(query)
+            ) else self._engine.execute(query)
+        
+        self._engine.dispose
+        
+    def is_connected(self):
+        """
+        This function checks if a connection to a database is open or not and returns a boolean value
+        accordingly.
+        :return: a boolean value indicating whether the database connection is currently open or not. If
+        the connection is open, it returns True, otherwise it returns False. If an exception occurs
+        during the connection attempt, it also returns False.
+        """
+        try:
+            connection = self._engine.connect()
+            is_open = connection.closed
+            connection.close()
+            return not is_open
+        except Exception as e:
+            return False
+        
+    def engine(self):
+        """
+        This function returns the value of the private attribute "engine".
+        :return: The method `engine` is being defined as returning the private attribute `__engine` of
+        the object.
+        """
+        return self.__engine
+        
 
     def read_file(self, reader, file_path, **kwargs):
         """
