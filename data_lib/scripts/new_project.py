@@ -68,8 +68,8 @@ def generate_nb(path):
     )[0]
 
     
-    notebook = "jupyter_notebook_sample"
-    shutil.copy2(notebook_template, cwd +  f"{path}/01_notebooks/{notebook}.ipynb")
+    utils_file = "jupyter_notebook_sample"
+    shutil.copy2(notebook_template, cwd +  f"{path}/01_notebooks/{utils_file}.ipynb")
 
 def generate_pu(path):
     """
@@ -101,8 +101,8 @@ def main():
     
     # place initial files
     generate_nb(root_path)
-    generate_pu(root_path)
-    
+    generate_pu(root_path)    
+
 
 
 if __name__ == "__main__":
