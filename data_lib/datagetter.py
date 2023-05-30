@@ -5,8 +5,10 @@ import platform as pt
 import pandas as pd
 import xlwings as xw
 from xlwings.utils import rgb_to_int
+from snowflake.snowpark import Session
 from .datalibutils import *
 from .dbcon import DBCon 
+
 
 
 if pt.system() == "Windows":
@@ -47,7 +49,25 @@ class DataGetter (DBCon):
         """
         db_uri = create_database_uri(provider, environment)
         self._engine = self.set_engine(db_uri)
+       
+    def snowpark_session(self):
+        """
+        This function creates a new session for a Snowpark engine using connection parameters.
+        :return: a new Snowflake session object created using the connection parameters extracted from
+        the SQLAlchemy engine URL.
+        """
         
+        connection_parameters = self._engine.engine.url.translate_connect_args()
+        if len(connection_parameters) == 2:            
+            connection_parameters["account"] = connection_parameters.pop("host")
+            connection_parameters["user"] = connection_parameters.pop("username")
+            connection_parameters["authenticator"] = connection_parameters.pop("username")
+        else:
+            connection_parameters["user"] = connection_parameters.pop("username")
+            connection_parameters["authenticator"] = connection_parameters.pop("username")
+            
+        new_session = Session.builder.configs(connection_parameters).create()
+        return new_session 
 
     def run_sql_query(self, query, **kwargs):
         """
