@@ -50,24 +50,14 @@ class DataGetter (DBCon):
         db_uri = create_database_uri(provider, environment)
         self._engine = self.set_engine(db_uri)
        
-    def snowpark_session(self):
+    def snowpark_session(self):        
         """
-        This function creates a new session for a Snowpark engine using connection parameters.
-        :return: a new Snowflake session object created using the connection parameters extracted from
-        the SQLAlchemy engine URL.
+        This function creates and returns a Snowpark session using the provided engine arguments.
+        :return: The function `snowpark_session` returns a Snowpark session object created using the
+        `Session.builder.configs` method with the `_engine_args` parameter passed in.
         """
-        
-        connection_parameters = self._engine.engine.url.translate_connect_args()
-        if len(connection_parameters) == 2:            
-            connection_parameters["account"] = connection_parameters.pop("host")
-            connection_parameters["user"] = connection_parameters.pop("username")
-            connection_parameters["authenticator"] = connection_parameters.pop("username")
-        else:
-            connection_parameters["user"] = connection_parameters.pop("username")
-            connection_parameters["authenticator"] = connection_parameters.pop("username")
-            
-        new_session = Session.builder.configs(connection_parameters).create()
-        return new_session 
+        snowpark_session = Session.builder.configs(self._engine_args).create()
+        return snowpark_session 
 
     def run_sql_query(self, query, **kwargs):
         """
