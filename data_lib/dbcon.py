@@ -14,7 +14,8 @@ class DBCon:
         :return: The create_engine function is being returned.
         """
         engine = create_engine(uri)   
-        self.engine_args(engine)  
+        if "snowflake" in engine.url:
+            self.engine_args(engine)  
         return engine 
     
     def engine_args(self, db_engine):
